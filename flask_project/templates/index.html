@@ -8,19 +8,21 @@
     <script src="{{ url_for('static', filename='main.js') }}" defer></script>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="navbar__logo">
-            <a href="">EwhaMarket</a>
+    <div class="navbar">
+        <div class="logo">
+            EwhaMarket
         </div>
-        <ul class="navbar__menu">
-            <li><a href="">List</a></li>
-            <li><a href="">Review</a></li>
-            <li><a href="">Register Items</a></li>
-            <li><a href="">Register Reviews</a></li>
-        </ul>
-        <a href="#" class="navbar__toogleBtn">
-            <i class="fas fa-bars"></i>
-        </a>
-    </nav>
+        <div class="menu">
+            <a href="/list">List</a>
+            <a href="/review">Review</a>
+            <a href="/reg_items">Register Items </a>
+            <a href="/reg_reviews">Register Reviews</a>
+        </div>
+    </div>
+<div class="main-content">
+    {% block section %}
+    메인 화면입니다.
+    {% endblock %}
+</div>
 </body>
 </html>
