@@ -1,3 +1,6 @@
+{% extends "index.html" %}
+
+{% block section %}
 <p>
 	Seller {{data.seller}} sells {{data.name}} and its category is {{data.category}}.<br>
 	The item is
@@ -27,3 +30,4 @@
 		NOT accepted!<br>
 	{% endif %}
 </p>
+{% endblock %}
