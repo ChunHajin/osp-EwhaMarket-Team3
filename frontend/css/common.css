@@ -1,0 +1,159 @@
+/* =======================================
+ * 공통 스타일 시트
+ * =======================================
+ */
+
+/* --- 0. CSS 변수 정의 --- */
+:root {
+  /* 색상 팔레트 */
+  --ewha-green: #00462A;
+  --ewha-green-dark: #00331F;
+  --gray-50: #F9FAFB;
+  --gray-100: #F3F4F6;
+  --gray-200: #E5E7EB;
+  --gray-400: #9CA3AF;
+  --gray-600: #4B5563;
+  --gray-800: #1F2937;
+  --white: #FFFFFF;
+
+  /* 그림자 */
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+
+  /* 폰트 */
+  --font-main: 'Noto Sans KR', sans-serif;
+}
+
+/* --- 1. Reset / 기본 --- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-main);
+  background-color: var(--gray-50);
+  color: var(--gray-800);
+}
+a { color: inherit; text-decoration: none; }
+
+/* --- 2. 유틸리티 클래스 --- */
+.text-center { text-align: center; }
+.flex-center { display: flex; justify-content: center; align-items: center; }
+.mb-1 { margin-bottom: 0.25rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-4 { margin-bottom: 1rem; }
+
+/* --- 3. Layout --- */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+.main-content {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+.card {
+  background-color: var(--white);
+  padding: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+/* --- 4. Header --- */
+.header {
+  background-color: var(--white);
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+}
+.logo-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.logo-icon-wrapper {
+  height: 2rem; width: 2rem;
+  background-color: var(--ewha-green);
+  color: var(--white);
+  font-weight: 700;
+  font-size: 1.25rem;
+  border-radius: 0.375rem;
+  display: flex; justify-content: center; align-items: center;
+}
+.logo-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--ewha-green);
+}
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.header-icon-button {
+  padding: 0.5rem;
+  border-radius: 9999px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.header-icon-button:hover { background-color: var(--gray-50); }
+.header-icon-button svg {
+  width: 1.5rem; height: 1.5rem; color: var(--gray-600);
+}
+
+/* --- 5. Buttons --- */
+.btn {
+  display: inline-block;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.btn-primary {
+  background-color: var(--ewha-green);
+  color: var(--white);
+  box-shadow: var(--shadow-md);
+}
+.btn-primary:hover { background-color: var(--ewha-green-dark); }
+.btn-secondary {
+  background-color: var(--white);
+  color: var(--gray-800);
+  border: 1px solid var(--gray-200);
+}
+.btn-secondary:hover { background-color: var(--gray-50); }
+.btn-full { width: 100%; }
+.btn-large { padding: 0.75rem 1rem; }
+
+/* --- 6. Forms --- */
+.form-group { margin-bottom: 0.75rem; }
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--gray-600);
+  margin-bottom: 0.25rem;
+}
+.form-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--gray-200);
+  border-radius: 0.375rem;
+  font-size: 1rem;
+}
+.form-input:focus {
+  outline: none;
+  border-color: #22C55E;
+  box-shadow: 0 0 0 1px #22C55E;
+}
