@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>상품 등록 | 이화마켓</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/common.css" />
+  <link rel="stylesheet" href="./css/product-create.css" />
+</head>
+<body>
+
+  <!-- 공용 아이콘(벡터) 심볼: header에서 사용 -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+    <symbol id="icon-heart" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+    </symbol>
+    <symbol id="icon-user" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+    </symbol>
+  </svg>
+
+  <!-- 상단 헤더 (product-detail.html과 동일 스타일) -->
+  <header class="header">
+    <div class="container header-inner">
+      <div class="logo-group">
+        <div class="logo-icon-wrapper"><span>E</span></div>
+        <h1 class="logo-text">이화마켓</h1>
+      </div>
+      <nav class="header-nav">
+        <button class="btn btn-green">판매하기</button>
+        <button class="btn btn-white">찜</button>
+        <button class="header-icon-button" aria-label="로그인">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <use href="#icon-user"></use>
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container create-wrap">
+    <h1 class="create-title">상품 등록</h1>
+
+    <form id="productCreateForm" class="create-form card" autocomplete="off">
+      <!-- LEFT: 입력 필드 -->
+      <section class="left">
+        <div class="field">
+          <label for="title">상품</label>
+          <div class="control">
+            <input id="title" name="title" class="form-input" type="text" placeholder="제목을 작성하세요" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>작성자 아이디</label>
+          <div class="control control-static">ewhaosp</div>
+        </div>
+
+        <div class="field">
+          <label for="price">가격</label>
+          <div class="control">
+            <input id="price" name="price" class="form-input" type="number" min="0" step="100" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="region">지역</label>
+          <div class="control">
+            <select id="region" name="region" class="form-input">
+              <option value="" selected disabled>선택</option>
+              <option>ECC</option><option>정문</option><option>후문</option><option>신촌</option><option>기타</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="status">상태</label>
+          <div class="control">
+            <select id="status" name="status" class="form-input">
+              <option value="" selected disabled>선택</option>
+              <option>미개봉</option><option>상</option><option>중</option><option>하</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: 사진 + 설명 -->
+      <section class="right">
+        <div class="field vertical">
+          <label for="photos">사진 첨부</label>
+          <div class="photo-drop" tabindex="0">
+            <input id="photos" name="photos" type="file" accept="image/*" multiple />
+            <div class="plus">+</div>
+          </div>
+        </div>
+
+        <div class="field vertical">
+          <label for="desc">상품 설명</label>
+          <textarea id="desc" name="desc" class="form-input textarea" rows="7" placeholder="내용을 작성하세요"></textarea>
+        </div>
+      </section>
+
+      <div class="actions">
+        <button type="submit" class="btn btn-green btn-large submit-btn">등록하기</button>
+      </div>
+    </form>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">© 2025 이화마켓</div>
+  </footer>
+
+  <script>
+    // 화면설계 단계: 실제 제출 막기
+    document.getElementById('productCreateForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      alert('현재 화면설계 단계입니다. 실제 업로드는 진행되지 않습니다.');
+    });
+  </script>
+</body>
+</html>

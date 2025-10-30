@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>찜 | 이화마켓</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/common.css" />
+  <link rel="stylesheet" href="./css/product-wishlist.css" />
+</head>
+<body>
+
+  <!-- 벡터 아이콘 심볼 -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+    <symbol id="icon-heart" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+    </symbol>
+    <symbol id="icon-user" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+    </symbol>
+  </svg>
+
+  <!-- 공통 스타일의 헤더 -->
+  <header class="header">
+    <div class="container header-inner">
+      <div class="logo-group">
+        <div class="logo-icon-wrapper"><span>E</span></div>
+        <h1 class="logo-text">이화마켓</h1>
+      </div>
+      <nav class="header-nav">
+        <button class="btn btn-green">판매하기</button>
+        <button class="btn btn-white">찜</button>
+        <button class="header-icon-button" aria-label="로그인">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><use href="#icon-user"></use></svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container wishlist-wrap">
+    <div class="wishlist-head">
+      <h1 class="wishlist-title">내가 찜한 상품</h1>
+      <p class="wishlist-sub">하트를 누른 상품만 모아봤어요.</p>
+    </div>
+
+    <!-- 비어있을 때 -->
+    <section id="emptyState" class="wishlist-empty hidden">
+      <p>아직 찜한 상품이 없어요.</p>
+      <a href="./product-list.html" class="btn btn-green">상품 보러가기</a>
+    </section>
+
+    <!-- 카드 그리드 -->
+    <section id="grid" class="wishlist-grid"></section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">© 2025 이화마켓</div>
+  </footer>
+
+  <!-- 임시 데이터 + localStorage 연동 -->
+  <script>
+    // 화면설계용 상품 더미
+    const PRODUCTS = [
+      { id: "p101", title: "네이비 가디건", price: 15000, badge: "의류",  img: "" },
+      { id: "p205", title: "무선 이어폰",   price: 38000, badge: "전자기기", img: "" },
+      { id: "p309", title: "자료구조 교재", price: 7000,  badge: "도서",   img: "" },
+      { id: "p412", title: "텀블러 500ml",  price: 6000,  badge: "생활용품", img: "" }
+    ];
+
+    // wishlist(id 배열)를 localStorage에 저장한다고 가정
+    const KEY = "wishlist";
+    let stored = [];
+    try { stored = JSON.parse(localStorage.getItem(KEY) || "[]"); } catch(_) {}
+    // 데모용: 비어 있으면 기본 두 개 찜해두기
+    if (!stored.length) {
+      stored = ["p101","p205"];
+      localStorage.setItem(KEY, JSON.stringify(stored));
+    }
+    const wishIds = new Set(stored);
+    const wishItems = PRODUCTS.filter(p => wishIds.has(p.id));
+
+    const grid = document.getElementById("grid");
+    const empty = document.getElementById("emptyState");
+
+    if (!wishItems.length) {
+      empty.classList.remove("hidden");
+    } else {
+      grid.innerHTML = wishItems.map(p => `
+        <article class="product-card">
+          <a class="thumb" href="./product-detail.html?id=${p.id}">
+            <img src="${p.img}" alt="${p.title}">
+            <span class="badge">${p.badge}</span>
+          </a>
+          <div class="meta">
+            <h3 class="title">${p.title}</h3>
+            <div class="row">
+              <span class="price">${p.price.toLocaleString()}원</span>
+              <button class="heart filled" data-id="${p.id}" aria-label="찜 해제">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><use href="#icon-heart"></use></svg>
+              </button>
+            </div>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    // 찜 해제 → 목록에서 제거
+    grid.addEventListener("click", (e) => {
+      const btn = e.target.closest(".heart");
+      if (!btn) return;
+      const id = btn.dataset.id;
+      const set = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+      set.delete(id);
+      localStorage.setItem(KEY, JSON.stringify([...set]));
+      // 간단히 새로고침으로 반영
+      location.reload();
+    });
+  </script>
+</body>
+</html>
