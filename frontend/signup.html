@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이화마켓 - 회원가입</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/signup.css">
+</head>
+
+<body>
+    <!-- 공용 아이콘 심볼 -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+
+        <!-- 찜 (Heart) -->
+        <symbol id="icon-heart" viewBox="0 0 24 24">
+            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364
+           l7.682-7.682a4.5 4.5 0 00-6.364-6.364
+           L12 7.636l-1.318-1.318a4.5 4.5 0
+           00-6.364 0z" />
+        </symbol>
+
+        <!-- 사용자 (User) -->
+        <symbol id="icon-user" viewBox="0 0 24 24">
+            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0z
+           M12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </symbol>
+
+    </svg>
+
+    <header class="header">
+        <div class="container header-inner">
+            <a href="#" class="logo-group">
+                <div class="logo-icon-wrapper"><span>E</span></div>
+                <h1 class="logo-text">이화마켓</h1>
+            </a>
+            <nav class="header-nav">
+                <button class="btn btn-green">판매하기</button>
+                <button class="btn btn-white">찜</button>
+                <button class="header-icon-button">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <use href="#icon-user"></use>
+                    </svg>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <div class="auth-container">
+        <div class="auth-form-wrapper">
+            <div class="card">
+                <div class="auth-title">
+                    <h1>이화마켓 회원가입</h1>
+                </div>
+                <form>
+                    <div class="form-group">
+                        <label for="user-id" class="form-label">아이디 (필수)</label>
+                        <div class="form-group-with-button">
+                            <input type="text" id="user-id" class="form-input">
+                            <button type="button" class="form-inline-button">중복확인</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="password" class="form-label">비밀번호 (필수)</label>
+                        <input type="password" id="password" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="password-confirm" class="form-label">비밀번호 확인</label>
+                        <input type="password" id="password-confirm" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="email" class="form-label">이메일 주소 (필수)</label>
+                        <input type="email" id="email" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone" class="form-label">핸드폰 번호 (선택)</label>
+                        <input type="tel" id="phone" class="form-input">
+                    </div>
+                    <div style="padding-top: 0.5rem;">
+                        <button type="submit" class="btn btn-green btn-full" style="padding: 0.625rem 0;">회원가입</button>
+                    </div>
+                </form>
+                <p class="auth-card-footer">
+                    이미 계정이 있으신가요? <a href="#">로그인</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
