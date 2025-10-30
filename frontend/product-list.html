@@ -1,0 +1,145 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>이화마켓 - 메인</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/product-list.css">
+</head>
+
+<body>
+  <!-- 공용 아이콘 심볼 -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+
+    <!-- 찜 (Heart) -->
+    <symbol id="icon-heart" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364
+           l7.682-7.682a4.5 4.5 0 00-6.364-6.364
+           L12 7.636l-1.318-1.318a4.5 4.5 0
+           00-6.364 0z" />
+    </symbol>
+
+    <!-- 사용자 (User) -->
+    <symbol id="icon-user" viewBox="0 0 24 24">
+      <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0z
+           M12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+    </symbol>
+
+  </svg>
+
+  <header class="header">
+    <div class="container header-inner">
+      <a href="#" class="logo-group">
+        <div class="logo-icon-wrapper"><span>E</span></div>
+        <h1 class="logo-text">이화마켓</h1>
+      </a>
+      <nav class="header-nav">
+        <button class="btn btn-green">판매하기</button>
+        <button class="btn btn-white">찜</button>
+        <button class="header-icon-button">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <use href="#icon-user"></use>
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <h2 class="page-title">지금 이화에는 이런 상품들이 있어요!</h2>
+
+    <div class="category-filter">
+      <button class="btn-pill btn-pill-active">전체</button>
+      <button class="btn-pill btn-pill-inactive">전공서적</button>
+      <button class="btn-pill btn-pill-inactive">전자기기</button>
+      <button class="btn-pill btn-pill-inactive">생활용품</button>
+      <button class="btn-pill btn-pill-inactive">의류/잡화</button>
+    </div>
+
+    <div class="product-grid">
+      <div class="product-card">
+        <div class="product-card-image"></div>
+        <div class="product-card-content">
+          <span class="tag-status tag-status-great">상태 최상</span>
+          <h3 class="product-title">점프 투 파이썬 팝니다</h3>
+          <div><span class="tag-info">#학관</span><span class="tag-info">#직거래</span></div>
+          <div class="product-meta-row">
+            <p class="product-price">12,000원</p>
+            <div class="like-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="like-icon">
+                <use href="#icon-heart"></use>
+              </svg>
+              <span>5</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="product-card-image"></div>
+        <div class="product-card-content">
+          <span class="tag-status tag-status-defect">약간의 하자</span>
+          <h3 class="product-title">무선 마우스 팝니다</h3>
+          <div><span class="tag-info">#택배</span></div>
+          <div class="product-meta-row">
+            <p class="product-price">25,000원</p>
+            <div class="like-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="like-icon">
+                <use href="#icon-heart"></use>
+              </svg>
+              <span>3</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="product-card-image"></div>
+        <div class="product-card-content">
+          <span class="tag-status tag-status-used">사용감 있음</span>
+          <h3 class="product-title">이화상점 텀블러</h3>
+          <div><span class="tag-info">#ECC</span><span class="tag-info">#직거래</span></div>
+          <div class="product-meta-row">
+            <p class="product-price">5,000원</p>
+            <div class="like-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="like-icon">
+                <use href="#icon-heart"></use>
+              </svg>
+              <span>1</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="product-card-image"></div>
+        <div class="product-card-content">
+          <span class="tag-status tag-status-great">상태 최상</span>
+          <h3 class="product-title">갤럭시 버즈3 화이트</h3>
+          <div><span class="tag-info">#택배</span></div>
+          <div class="product-meta-row">
+            <p class="product-price">80,000원</p>
+            <div class="like-info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="like-icon">
+                <use href="#icon-heart"></use>
+              </svg>
+              <span>8</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pagination">
+      <nav aria-label="Page navigation">
+        <ul class="pagination-list">
+          <li><a href="#" aria-current="page" class="active">1</a></li>
+          <li><a href="#">2</a></li>
+          <li><a href="#">3</a></li>
+        </ul>
+      </nav>
+    </div>
+  </main>
+</body>
+
+</html>

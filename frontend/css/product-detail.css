@@ -7,7 +7,7 @@
 .btn-icon-like {
     padding: 0.75rem;
     border-radius: 0.5rem;
-    border: 2px solid var(--ewha-green);
+    border: 1.2px solid var(--gray-600);
     background-color: transparent;
     cursor: pointer;
     transition: background-color 0.2s ease-in-out;
@@ -17,7 +17,7 @@
 }
 .btn-icon-like svg {
     width: 1.5rem;
-    height: 1.5rem;
+    height: 1.0rem;
     color: var(--ewha-green);
     display: block;
 }
