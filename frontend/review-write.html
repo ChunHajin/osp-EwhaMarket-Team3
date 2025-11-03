@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>리뷰 쓰기 - 이화마켓</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="common.css">
+    <link rel="stylesheet" href="review-write.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="container header-inner">
+            <div class="logo-group">
+                <div class="logo-icon-wrapper">E</div>
+                <div class="logo-text">이화마켓</div>
+            </div>
+            <div class="header-nav">
+                <a href="#" class="btn btn-green">판매하기</a>
+                <button class="header-icon-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.094-4.5-4.688-4.5-1.936 0-3.666 1.096-4.312 2.766C11.97 6.782 10.24 5.75 8.312 5.75c-2.594 0-4.688 2.015-4.688 4.5 0 2.516 2.094 4.516 4.688 4.516 1.936 0 3.666-1.096 4.312-2.766.646 1.67 2.376 2.766 4.312 2.766 2.594 0 4.688-2.015 4.688-4.5z" />
+                    </svg>
+                </button>
+                <button class="header-icon-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0l-.301-.976-.115-.36a.75.75 0 00-.735-.558H5.652a.75.75 0 00-.735.558l-.115.36-.301.976z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="review-write-container">
+            <h1 class="page-title">리뷰 쓰기</h1>
+
+            <section class="review-product-section">
+                <h2 class="section-title">상품</h2>
+                <div class="product-photo-upload-group">
+                    <div class="product-info-card">
+                        <img src="ipad_air_4th_gen.png" alt="아이패드 에어 4세대" class="product-image">
+                        <div class="product-details">
+                            <p class="user-name">사용자 이름</p>
+                            <p class="product-name">아이패드 에어 4세대</p>
+                        </div>
+                    </div>
+
+                    <div class="photo-upload-box">
+                        <h2 class="section-title">사진 첨부</h2>
+    
+                        <label for="file-upload" class="photo-placeholder">
+                            <span class="plus-icon">+</span>
+        
+                            <input type="file" id="file-upload" name="review-photos" multiple accept="image/*" class="hidden-input">
+                            <span class="file-name-display"></span>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <form class="review-form">
+                <div class="review-form-grid">
+                    <div class="review-meta-group">
+                        <div class="form-row">
+                            <label for="writerId" class="form-label">작성자 아이디</label>
+                            <p id="writerId" class="writer-id-text">ewhaosp</p>
+                        </div>
+                        
+                        <div class="form-row">
+                            <label for="reviewTitle" class="form-label">제목</label>
+                            <input type="text" id="reviewTitle" class="form-input review-title-input" placeholder="제목을 작성하세요">
+                        </div>
+
+                        <div class="form-row">
+                            <label class="form-label">별점</label>
+                            <div class="star-rating" data-rating="0">
+                                <i class="far fa-star star" data-value="1"></i>
+                                <i class="far fa-star star" data-value="2"></i>
+                                <i class="far fa-star star" data-value="3"></i>
+                                <i class="far fa-star star" data-value="4"></i>
+                                <i class="far fa-star star" data-value="5"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="review-content-group">
+                        <label for="reviewContent" class="form-label">내용</label>
+                        <textarea id="reviewContent" class="form-input review-textarea" rows="10" placeholder="리뷰 내용을 작성하세요"></textarea>
+                    </div>
+                </div>
+
+                <div class="submit-button-wrapper">
+                    <button type="submit" class="btn btn-green btn-register">등록하기</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        // 별점 기능 구현 (JavaScript)
+        document.addEventListener('DOMContentLoaded', () => {
+            const starRating = document.querySelector('.star-rating');
+            const stars = starRating.querySelectorAll('.star');
+            
+            // 초기 별점 상태 설정
+            function updateStars(rating) {
+                stars.forEach(star => {
+                    const starValue = parseInt(star.getAttribute('data-value'));
+                    if (starValue <= rating) {
+                        star.classList.remove('far');
+                        star.classList.add('fas');
+                    } else {
+                        star.classList.remove('fas');
+                        star.classList.add('far');
+                    }
+                });
+                starRating.setAttribute('data-rating', rating);
+            }
+
+            // 초기 별점 (예시로 3점 설정)
+            updateStars(0); 
+
+            // 클릭 이벤트 리스너
+            stars.forEach(star => {
+                star.addEventListener('click', () => {
+                    const rating = parseInt(star.getAttribute('data-value'));
+                    updateStars(rating);
+                });
+            });
+            
+            // 마우스 호버 이벤트 (호버 시 해당 별점까지 색상 변경)
+            stars.forEach(star => {
+                star.addEventListener('mouseover', () => {
+                    const hoverRating = parseInt(star.getAttribute('data-value'));
+                    stars.forEach(s => {
+                        const starValue = parseInt(s.getAttribute('data-value'));
+                        if (starValue <= hoverRating) {
+                            s.classList.remove('far');
+                            s.classList.add('fas');
+                        } else {
+                            s.classList.remove('fas');
+                            s.classList.add('far');
+                        }
+                        s.style.color = '#FFC107'; // 호버 시 노란색
+                    });
+                });
+                
+                star.addEventListener('mouseout', () => {
+                    const currentRating = parseInt(starRating.getAttribute('data-rating'));
+                    updateStars(currentRating); // 저장된 별점으로 복원
+                    stars.forEach(s => {
+                       s.style.color = 'var(--gray-400)'; // 저장된 별점 외에는 회색
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

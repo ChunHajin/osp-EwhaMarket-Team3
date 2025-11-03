@@ -1,0 +1,207 @@
+/* =========================================
+ * review-write.css
+ * ========================================= */
+
+/* --- 1. 레이아웃 및 제목 --- */
+.review-write-container {
+    max-width: 800px; /* 리뷰 작성 폼의 최대 너비 제한 */
+    margin: 0 auto;
+}
+
+.page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--gray-600);
+}
+
+.section-divider {
+    border: 0;
+    border-top: 1px solid var(--gray-200);
+    margin: 2rem 0;
+}
+
+/* --- 2. 상품 정보 및 사진 첨부 섹션 (.review-product-section) --- */
+.review-product-section {
+    margin-bottom: 2rem;
+}
+
+.product-photo-upload-group {
+    display: grid; 
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem; 
+    align-items: flex-start;
+}
+
+/* 2-1. 상품 정보 카드 */
+.product-info-card {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    border: 1px solid var(--gray-200);
+    border-radius: 0.5rem;
+    background-color: var(--white);
+    width: 45%; 
+    height: auto;
+    box-shadow: var(--shadow-sm);
+}
+
+.product-image {
+    width: 4rem;
+    height: 4rem;
+    object-fit: cover;
+    border-radius: 0.375rem;
+}
+
+.product-details {
+    padding-top: 0.25rem; 
+}
+
+.product-details .user-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.product-details .product-name {
+    color: var(--gray-600);
+    font-size: 0.95rem;
+}
+
+/* 2-2. 사진 첨부 영역 */
+.photo-upload-box{
+    width: 100%; 
+}
+
+.photo-upload-box .section-title {
+    margin-left: 0;
+    text-align: left;
+}
+
+.photo-placeholder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 9rem;
+    background-color: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    cursor: pointer; /* 클릭 가능하다는 시각적 힌트 제공 */
+    position: relative;
+}
+
+.photo-placeholder:hover {
+    background-color: var(--gray-200);
+}
+
+.plus-icon {
+    font-size: 3rem;
+    color: var(--gray-400);
+    font-weight: 300;
+    line-height: 1;
+}
+
+/* 실제 파일 입력창 (input)을 화면에서 완전히 숨김 */
+.hidden-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+/* --- 3. 리뷰 폼 섹션 (.review-form) --- */
+.review-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 왼쪽 메타정보, 오른쪽 내용으로 2열 구성 */
+    gap: 3rem;
+}
+
+/* 3-1. 왼쪽 메타 정보 (작성자, 제목, 별점) */
+.review-meta-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-row {
+    /* 이미지를 보면 라벨과 입력 필드가 가로로 나열되어 있습니다. */
+    display: grid;
+    grid-template-columns: 80px 1fr; /* 라벨: 80px, 입력: 나머지 */
+    align-items: center;
+}
+
+.review-meta-group .form-label {
+    margin-bottom: 0; /* grid 레이아웃에 맞게 마진 제거 */
+    font-weight: 700;
+    color: var(--gray-800);
+}
+
+.writer-id-text {
+    font-weight: 500;
+    color: var(--gray-800);
+    padding: 0.5rem 0.75rem;
+}
+
+/* 3-2. 오른쪽 내용 */
+.review-content-group {
+    grid-column: 2; /* 2번째 컬럼에 위치 */
+    text-align: left;
+}
+
+.review-content-group .form-label {
+    /* 내용을 보면 '내용' 라벨이 위에 있습니다. */
+    display: block; 
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    color: var(--gray-800);
+}
+
+.review-textarea {
+    min-height: 12rem; /* 이미지와 유사하게 높이 설정 */
+    resize: none; /* 크기 조절 방지 */
+}
+
+/* 3-3. 별점 스타일링 */
+.star-rating {
+    font-size: 1.5rem;
+    color: var(--gray-400); /* 기본 회색 별 */
+    cursor: pointer;
+    white-space: nowrap; /* 별점 아이콘들이 한 줄에 유지되도록 */
+}
+
+.star-rating .fas {
+    color: #FFC107; /* 채워진 별 노란색 (Font Awesome Solid) */
+}
+
+.star-rating .star {
+    margin-right: 0.125rem;
+}
+
+/* 3-4. 등록 버튼 */
+.submit-button-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 3rem;
+}
+
+.btn-register {
+    width: 250px; /* 버튼 너비 조정 */
+    font-size: 1.1rem;
+    padding: 0.75rem 1rem;
+    box-shadow: var(--shadow-md);
+}
