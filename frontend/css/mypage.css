@@ -1,0 +1,190 @@
+.main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    padding-top: 2rem;
+    padding-bottom: 4rem;
+}
+
+.card.profile {
+    flex: 100%; 
+    max-width: none;
+    order: -1;
+    padding: 30px 20px;
+    height: fit-content;
+    display: flex;
+    flex-direction: column; 
+    align-items: center;
+}
+
+.activity-section {
+    flex: 100%;
+}
+
+.activity-section .product-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr); 
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+/* 반응형: 상품 2열 조회 */
+@media (min-width: 832px) {
+    .main-content {
+        flex-direction: row; 
+    }
+    
+    .card.profile {
+        flex: 25%;
+        max-width: 300px;
+        order: 0;
+    }
+    
+    .activity-section {
+        flex: 1;
+    }
+
+    .activity-section .product-grid { 
+        grid-template-columns: repeat(2, 1fr); 
+    }
+}
+
+/* 반응형: 상품 3열 조회 */
+@media (min-width: 1024px) {
+    .activity-section .product-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.my-img-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.my-img {
+    width: 96px;
+    height: 96px;
+    background-color: var(--gray-200); 
+    border-radius: 50%; 
+    margin-bottom: 0; 
+    transition: filter 0.2s;
+}
+
+/* 마우스 오버 시 프로필 사진 변경 가능 */
+.change-photo-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.9rem;
+    line-height: 1.2;
+    text-align: center;
+    font-weight: 500;
+    color: var(--white);
+    opacity: 0; 
+    transition: opacity 0.2s;
+    pointer-events: none;
+}
+
+.my-img-area:hover .my-img {
+    filter: brightness(0.7); 
+}
+
+.my-img-area:hover .change-photo-text {
+    opacity: 1; 
+}
+
+.my-name {
+    font-size: 24px;
+    font-weight: 700;
+    margin-top: 10px; 
+    margin-bottom: 10px;
+}
+
+.seller-info {
+    margin-bottom: 30px;
+    font-size: 14px;
+    color: var(--gray-600);
+}
+
+.product-state:first-child {
+    padding-right: 14px;
+}
+
+.card.profile .btn-full {
+    width: 100%; 
+    margin-top: 10px;
+}
+
+.link-withdraw {
+    margin-top: 20px;
+    font-size: 14px;
+    color: var(--gray-400); 
+    text-decoration: underline;
+}
+.link-withdraw:hover {
+    color: var(--gray-600);
+}
+
+.mypage-tabs {
+    justify-content: flex-start;
+    margin-bottom: 30px;
+}
+
+.product-card-content .manage-buttons {
+    display: flex;
+    justify-content: flex-end; 
+    align-items: center;
+    gap: 8px; 
+    padding-top: 10px;
+    border-top: 1px solid var(--gray-100);
+    margin-top: 10px;
+}
+
+.manage-buttons .btn-text-small {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 13px;
+    color: var(--gray-600); 
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.manage-buttons .btn-green-text {
+    color: var(--ewha-green); 
+    font-weight: 600;
+}
+
+.manage-buttons .btn-disabled {
+    color: var(--gray-400);
+    cursor: not-allowed;
+}
+
+.product-card-image {
+    position: relative;
+    overflow: hidden;
+}
+
+.overlay-complete {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2; 
+}
+
+.overlay-text {
+    color: var(--white); 
+    font-size: 18px;
+    font-weight: 700;
+}
