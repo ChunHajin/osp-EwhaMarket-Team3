@@ -1,0 +1,126 @@
+/* 전체 리뷰 조회 화면 */
+
+.review-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  color: var(--gray-800);
+}
+
+.review-count {
+  color: var(--gray-600);
+  margin-bottom: 1rem;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* 리뷰 카드 그리드 */
+.review-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.review-card {
+  background-color: var(--white);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-md);
+  padding: 1rem;
+}
+
+.review-user {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--gray-200);
+}
+
+.user-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.username {
+  font-weight: 600;
+  color: var(--gray-800);
+  font-size: 0.95rem;
+}
+.date {
+  color: var(--gray-600);
+  font-size: 0.85rem;
+}
+
+.stars {
+  color: #FACC15;
+  font-size: 1rem;
+  margin-top: 0.25rem;
+}
+
+.rating {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0.25rem 0;
+}
+
+.content {
+  font-size: 0.95rem;
+  color: var(--gray-700);
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.product-name {
+  font-weight: 700;
+  color: var(--gray-800);
+  border-top: 1px solid var(--gray-200);
+  padding-top: 0.5rem;
+  font-size: 0.95rem;
+}
+
+/* 페이지네이션 */
+.pagination {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+}
+.pagination-list {
+  display: flex;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+}
+.pagination-list li a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.9rem;
+  color: var(--gray-600);
+  border: 1px solid var(--gray-200);
+  border-radius: 0.25rem;
+  background-color: var(--white);
+}
+.pagination-list li a.active {
+  border-color: var(--gray-400);
+  background-color: var(--gray-50);
+}
+.pagination-list li a:hover {
+  background-color: var(--gray-50);
+}
