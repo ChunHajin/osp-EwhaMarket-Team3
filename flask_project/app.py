@@ -4,7 +4,6 @@ import sys
 application = Flask(__name__)
 
 @application.route("/")
-<<<<<<< Updated upstream
 def index():
     return render_template("index.html")
 
@@ -38,7 +37,6 @@ def reg_item_submit():
     status = request.args.get("status")
     phone = request.args.get("phone")
     print(name, seller, addr, email, category, card, status, phone)
-<<<<<<< Updated upstream
     
 @application.route("/submit_item_post", methods=['POST'])
 def reg_item_submit_post():
@@ -46,12 +44,3 @@ def reg_item_submit_post():
     image_file.save("static/images/{}".format(image_file.filename))
     data = request.form
     return render_template("submit_item_result.html", data = data, img_path="static/images/{}".format(image_file.filename))
-=======
-=======
-def hello():
-return "Hello my webpage!"
-
-if __name__ == "__main__":
-application.run(host='0.0.0.0', debug=True)
->>>>>>> Stashed changes
->>>>>>> Stashed changes
