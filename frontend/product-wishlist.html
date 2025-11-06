@@ -39,25 +39,26 @@
     </div>
   </header>
 
-  <main class="container wishlist-wrap">
-    <div class="wishlist-head">
-      <h1 class="wishlist-title">내가 찜한 상품</h1>
+  <main class="main-content">
+    <div class="card wishlist-card">
+      <h2 class="wishlist-title">내가 찜한 상품</h2>
       <p class="wishlist-sub">하트를 누른 상품만 모아봤어요.</p>
+
+      <!-- 비어있을 때 -->
+      <section id="emptyState" class="wishlist-empty hidden">
+        <p>아직 찜한 상품이 없어요.</p>
+        <a href="./product-list.html" class="btn btn-green">상품 보러가기</a>
+      </section>
+
+      <!-- 카드 그리드 -->
+      <section id="grid" class="wishlist-grid"></section>
+      <!-- pagination -->
+      <div id="wishlistPaginationWrapper" class="pagination" aria-label="페이지네이션">
+        <ul id="wishlist-pagination" class="pagination-list"></ul>
+      </div>
     </div>
-
-    <!-- 비어있을 때 -->
-    <section id="emptyState" class="wishlist-empty hidden">
-      <p>아직 찜한 상품이 없어요.</p>
-      <a href="./product-list.html" class="btn btn-green">상품 보러가기</a>
-    </section>
-
-    <!-- 카드 그리드 -->
-    <section id="grid" class="wishlist-grid"></section>
   </main>
 
-  <footer class="site-footer">
-    <div class="container">© 2025 이화마켓</div>
-  </footer>
 
   <!-- 임시 데이터 + localStorage 연동 -->
   <script>
@@ -78,15 +79,19 @@
       stored = ["p101","p205"];
       localStorage.setItem(KEY, JSON.stringify(stored));
     }
-    const wishIds = new Set(stored);
-    const wishItems = PRODUCTS.filter(p => wishIds.has(p.id));
 
     const grid = document.getElementById("grid");
     const empty = document.getElementById("emptyState");
+    const paginationList = document.getElementById('wishlist-pagination');
+
+    // 간단 렌더: 모든 찜 아이템을 한 페이지에 렌더
+    const wishIds = new Set(stored);
+    const wishItems = PRODUCTS.filter(p => wishIds.has(p.id));
 
     if (!wishItems.length) {
-      empty.classList.remove("hidden");
+      empty.classList.remove('hidden');
     } else {
+      empty.classList.add('hidden');
       grid.innerHTML = wishItems.map(p => `
         <article class="product-card">
           <a class="thumb" href="./product-detail.html?id=${p.id}">
@@ -103,15 +108,20 @@
             </div>
           </div>
         </article>
-      `).join("");
+      `).join('');
+    }
+
+    // 시각적 페이지네이션: 항상 '1'만 보이도록
+    if (paginationList) {
+      paginationList.innerHTML = '<li><a class="active" href="#">1</a></li>';
     }
 
     // 찜 해제 → 목록에서 제거
-    grid.addEventListener("click", (e) => {
-      const btn = e.target.closest(".heart");
+    grid.addEventListener('click', (e) => {
+      const btn = e.target.closest('.heart');
       if (!btn) return;
       const id = btn.dataset.id;
-      const set = new Set(JSON.parse(localStorage.getItem(KEY) || "[]"));
+      const set = new Set(JSON.parse(localStorage.getItem(KEY) || '[]'));
       set.delete(id);
       localStorage.setItem(KEY, JSON.stringify([...set]));
       // 간단히 새로고침으로 반영

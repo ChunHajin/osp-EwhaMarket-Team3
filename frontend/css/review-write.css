@@ -20,7 +20,7 @@
     background: var(--white);
     border-radius: 12px;
     box-shadow: var(--shadow-md);
-    padding: 28px 32px 24px;
+    padding: 1.5rem;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 28px 48px; 
@@ -40,7 +40,7 @@
     color: var(--gray-600); 
 }
 
-    .control-static { 
+.control-static { 
     color: var(--gray-600); 
     padding: 11px 12px; 
 }
