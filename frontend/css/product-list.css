@@ -11,7 +11,7 @@
     overflow: hidden;
     transition: box-shadow 0.3s ease-in-out;
     position: relative;
-  cursor: pointer; /* make product card visually clickable */
+    cursor: pointer;
 }
 .product-card:hover {
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
@@ -105,16 +105,35 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
 }
-.soldout-overlay {
-    position: absolute;
-    top: 0; right: 0; bottom: 0; left: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--white);
-    font-size: 1.5rem;
-    font-weight: 700;
+
+/* 거래완료 상태 스타일 */
+.product-card--sold .product-card-image {
+  position: relative;
+}
+.product-card--sold .product-card-image::after {
+  content: '거래완료';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+
+  background: var(--gray-600);
+  color: var(--white);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-align: center;
+  line-height: 1;
+  pointer-events: none;
+}
+.product-card--sold .product-card-content {
+  opacity: 0.65;
+  filter: grayscale(0.02);
+}
+.product-card--sold .product-price {
+  color: var(--gray-600);
 }
 
 /* 반응형 */

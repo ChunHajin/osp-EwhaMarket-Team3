@@ -22,7 +22,7 @@
     margin-bottom: 1.5rem;
     font-size: 0.75rem;
     font-weight: 700;
-    color: #00462A;
+    color: var(--ewha-green);
 }
 /* 입력창과 버튼이 한 줄에 있는 폼 그룹 (아이디 + 중복확인) */
 .form-group-with-button {
@@ -58,12 +58,12 @@
 .auth-card-footer {
     text-align: center;
     font-size: 0.875rem;
-    color: #4B5563;
+    color: var(--gray-600);
     margin-top: 1.25rem;
 }
 .auth-card-footer a {
     font-weight: 500;
-    color: #00462A;
+    color: var(--ewha-green);
 }
 .auth-card-footer a:hover {
     text-decoration: underline;
