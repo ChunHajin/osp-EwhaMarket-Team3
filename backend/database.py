@@ -1,5 +1,7 @@
 import pyrebase
 import json
+import hashlib
+import os
 
 class DBhandler:
     def __init__(self):
@@ -51,3 +53,19 @@ class DBhandler:
         else:
             print(f"Error: User ID {data.get('id')} already exists.")
             return False
+        
+    # 상품 정보 삽입 함수
+    def insert_item(self, name, data, img_path):
+        item_info = {
+            "title": data.get("title"),
+            "price": data.get("price"),
+            "region": data.get("region"),
+            "status": data.get("status"),
+            "desc": data.get("desc"),
+            "author": "ewhaosp", # 임시 작성자
+            "img_path": img_path
+        }
+        # item 노드에 상품 정보 저장
+        self.db.child("item").child(name).set(item_info)
+        print("✅ Firebase Save Success:", item_info)
+        return True
