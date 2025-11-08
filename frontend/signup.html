@@ -54,29 +54,29 @@
                 <div class="auth-title">
                     <h1>이화마켓 회원가입</h1>
                 </div>
-                <form>
+                <form id="signup-form" method="post" action="/signup_post" onsubmit="return validateAndSubmit(event)">
                     <div class="form-group">
                         <label for="user-id" class="form-label">아이디 (필수)</label>
                         <div class="form-group-with-button">
-                            <input type="text" id="user-id" class="form-input">
-                            <button type="button" class="form-inline-button">중복확인</button>
+                            <input type="text" id="user-id" name="id" class="form-input" required>
+                            <button type="button" id="check-btn" class="form-inline-button">중복확인</button>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="password" class="form-label">비밀번호 (필수)</label>
-                        <input type="password" id="password" class="form-input">
+                        <input type="password" id="password" name="pw" class="form-input" required>
                     </div>
                     <div class="form-group">
                         <label for="password-confirm" class="form-label">비밀번호 확인</label>
-                        <input type="password" id="password-confirm" class="form-input">
+                        <input type="password" id="password-confirm" name="pw_confirm" class="form-input" required>
                     </div>
                     <div class="form-group">
                         <label for="email" class="form-label">이메일 주소 (필수)</label>
-                        <input type="email" id="email" class="form-input">
+                        <input type="email" id="email" name="email" class="form-input" required>
                     </div>
                     <div class="form-group">
                         <label for="phone" class="form-label">핸드폰 번호 (선택)</label>
-                        <input type="tel" id="phone" class="form-input">
+                        <input type="tel" id="phone" name="phone" class="form-input">
                     </div>
                     <div style="padding-top: 0.5rem;">
                         <button type="submit" class="btn btn-green btn-full" style="padding: 0.625rem 0;">회원가입</button>
@@ -88,6 +88,54 @@
             </div>
         </div>
     </div>
-</body>
+    
+    <script>
+        // 폼 제출 시 유효성 검사
+        function validateAndSubmit(e) {
+            const userId = document.getElementById('user-id').value.trim();
+            const password = document.getElementById('password').value;
+            const passwordConfirm = document.getElementById('password-confirm').value;
+            const email = document.getElementById('email').value.trim();
+            
+            if (!userId || !password || !email) {
+                alert('아이디, 비밀번호, 이메일은 필수 입력 항목입니다.');
+                return false; // 폼 제출 중단
+            }
+            if (password !== passwordConfirm) {
+                alert('비밀번호가 일치하지 않습니다.');
+                return false; // 폼 제출 중단
+            }
+            // 모든 검사 통과 시 폼 제출
+            return true;
+        }
+
+        // ID 중복확인 버튼 핸들러
+        document.getElementById('check-btn').addEventListener('click', async function () {
+            const userId = document.getElementById('user-id').value.trim();
+            if (!userId) {
+                alert('아이디를 입력하세요.');
+                return;
+            }
+            try {
+                // 백엔드 API (/api/check_userid) 호출
+                const resp = await fetch('/api/check_userid?userid=' + encodeURIComponent(userId));
+                const data = await resp.json();
+                
+                if (resp.ok) {
+                    if (data.available) {
+                        alert('사용 가능한 아이디입니다.');
+                    } else {
+                        alert('이미 존재하는 아이디입니다. 다른 아이디를 선택하세요.');
+                    }
+                } else {
+                    alert(data.message || '중복확인 실패');
+                }
+            } catch (e) {
+                console.error('중복확인 API 오류:', e);
+                alert('중복확인 중 오류가 발생했습니다.');
+            }
+        });
+    </script>
+    </body>
 
 </html>

@@ -42,7 +42,7 @@
   <main class="container create-wrap">
     <h1 class="create-title">상품 등록</h1>
 
-    <form id="productCreateForm" class="create-form card" autocomplete="off">
+    <form id="productCreateForm" action="/submit_item_post" method="POST" enctype="multipart/form-data" class="create-form card" autocomplete="off">
       <!-- LEFT: 입력 필드 -->
       <section class="left">
         <div class="field">
@@ -107,16 +107,5 @@
     </form>
   </main>
 
-  <footer class="site-footer">
-    <div class="container">© 2025 이화마켓</div>
-  </footer>
-
-  <script>
-    // 화면설계 단계: 실제 제출 막기
-    document.getElementById('productCreateForm').addEventListener('submit', function (e) {
-      e.preventDefault();
-      alert('현재 화면설계 단계입니다. 실제 업로드는 진행되지 않습니다.');
-    });
-  </script>
 </body>
 </html>
