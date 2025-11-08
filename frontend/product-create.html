@@ -1,44 +1,12 @@
-<!doctype html>
-<html lang="ko">
-<head>
-  <meta charset="utf-8" />
-  <title>상품 등록 | 이화마켓</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/common.css" />
-  <link rel="stylesheet" href="./css/product-create.css" />
-</head>
-<body>
+{% extends "index.html" %}
 
-  <!-- 공용 아이콘(벡터) 심볼: header에서 사용 -->
-  <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
-    <symbol id="icon-heart" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-    </symbol>
-    <symbol id="icon-user" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-    </symbol>
-  </svg>
+{% block title %}상품 등록 | 이화마켓{% endblock %}
 
-  <!-- 상단 헤더 (product-detail.html과 동일 스타일) -->
-  <header class="header">
-    <div class="container header-inner">
-      <div class="logo-group">
-        <div class="logo-icon-wrapper"><span>E</span></div>
-        <h1 class="logo-text">이화마켓</h1>
-      </div>
-      <nav class="header-nav">
-        <button class="btn btn-green">판매하기</button>
-        <button class="btn btn-white">찜</button>
-        <button class="header-icon-button" aria-label="로그인">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <use href="#icon-user"></use>
-          </svg>
-        </button>
-      </nav>
-    </div>
-  </header>
+{% block styles %}
+    <link rel="stylesheet" href="css/product-create.css">
+{% endblock %}
 
+{% block section %}
   <main class="container create-wrap">
     <h1 class="create-title">상품 등록</h1>
 
@@ -79,7 +47,7 @@
           <div class="control">
             <select id="status" name="status" class="form-input">
               <option value="" selected disabled>선택</option>
-              <option>미개봉</option><option>상</option><option>중</option><option>하</option>
+              <option>상태 최상</option><option>약간의 하자</option><option>사용감 있음</option>
             </select>
           </div>
         </div>
@@ -106,6 +74,4 @@
       </div>
     </form>
   </main>
-
-</body>
-</html>
+{% endblock %}

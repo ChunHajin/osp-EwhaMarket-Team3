@@ -17,7 +17,7 @@ DB = DBhandler()
 @app.route("/")
 def home():
     # 기본 페이지를 product-list.html로 리디렉션
-    # 다른 페이지 접속 필요 시 주소창의 html 파일명 직접 입력하세요 (임시 방편)
+    # 화면 이동 구현 안 된 페이지의 경우 주소창에서 html 파일명 직접 수정해 접속
     return redirect(url_for('product_list'))
 
 @app.route('/product-list.html')
@@ -32,6 +32,33 @@ def signup_page():
 def login_page():
     return render_template("login.html")
 
+@app.route('/product-detail.html')
+def product_detail():
+    return render_template('product-detail.html')
+
+@app.route('/product-create.html')
+def product_create():
+    return render_template('product-create.html')
+
+@app.route('/product-wishlist.html')
+def product_wishlist():
+    return render_template('product-wishlist.html')
+
+@app.route('/review-write.html')
+def review_write():
+    return render_template('review-write.html')
+
+@app.route('/review-detail.html')
+def review_detail():
+    return render_template('review-detail.html')
+
+@app.route('/review.html')
+def review_page():
+    return render_template('review.html')
+
+@app.route('/mypage.html')
+def mypage():
+    return render_template('mypage.html')
 
 # 1. ID 중복 확인 API (signup.html의 fetch 요청 처리)
 @app.route("/api/check_userid", methods=['GET'])
@@ -54,7 +81,7 @@ def check_userid():
 def register_user():
     data = request.form
     
-    # PDF 53페이지 참고: 비밀번호 해시 처리
+    # 비밀번호 해시 처리
     pw = data.get('pw')
     pw_hash = hashlib.sha256(pw.encode('utf-8')).hexdigest()
     
@@ -105,7 +132,7 @@ def submit_item_post():
     
 
 if __name__ == "__main__":
-    # frontend 폴더와 backend 폴더가 있는 루트에서 
-    # python -m backend.app (혹은 python backend/app.py)로 실행
-    # TODO: 제출 시 flask --debug run 사용하도록 수정
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    # 두 가지 방법으로 실행 가능
+    # 1) python backend/app.py
+    # 2) flask --app backend/app.py --debug run
+    app.run(host='0.0.0.0')
