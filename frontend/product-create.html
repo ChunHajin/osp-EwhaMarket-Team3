@@ -2,9 +2,36 @@
 
 {% block title %}상품 등록 | 이화마켓{% endblock %}
 
+<<<<<<< HEAD
 {% block styles %}
     <link rel="stylesheet" href="css/product-create.css">
 {% endblock %}
+=======
+  <!-- 상단 헤더 (product-detail.html과 동일 스타일) -->
+  <header class="header">
+    <div class="container header-inner">
+      <div class="logo-group">
+        <div class="logo-icon-wrapper"><span>E</span></div>
+        <h1 class="logo-text">이화마켓</h1>
+      </div>
+      <nav class="header-nav">
+        {% if user_id%}
+        <span><b>{{  user_id  }}</b>님 반갑습니다!</span>
+        <a href="/logout" class="btn btn-white">logout</a>
+        {%else%}
+        <a href="/login.html" class="btn btn-white">login</a>
+        {%endif%}
+        <button class="btn btn-green">판매하기</button>
+        <button class="btn btn-white">찜</button>
+        <button class="header-icon-button" aria-label="로그인">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <use href="#icon-user"></use>
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+>>>>>>> Week10
 
 {% block section %}
   <main class="container create-wrap">
@@ -74,4 +101,10 @@
       </div>
     </form>
   </main>
+<<<<<<< HEAD
 {% endblock %}
+=======
+
+</body>
+</html>
+>>>>>>> Week10

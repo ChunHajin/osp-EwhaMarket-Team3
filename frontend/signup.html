@@ -1,10 +1,59 @@
 {% extends "index.html" %}
 
+<<<<<<< HEAD
 {% block title %}회원가입 | 이화마켓{% endblock %}
 
 {% block styles %}
     <link rel="stylesheet" href="css/signup.css">
 {% endblock %}
+=======
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 | 이화마켓</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/signup.css">
+</head>
+
+<body>
+    <!-- 공용 아이콘 심볼 -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+
+        <!-- 찜 (Heart) -->
+        <symbol id="icon-heart" viewBox="0 0 24 24">
+            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364
+           l7.682-7.682a4.5 4.5 0 00-6.364-6.364
+           L12 7.636l-1.318-1.318a4.5 4.5 0
+           00-6.364 0z" />
+        </symbol>
+
+        <!-- 사용자 (User) -->
+        <symbol id="icon-user" viewBox="0 0 24 24">
+            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0z
+           M12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </symbol>
+
+    </svg>
+
+    <header class="header">
+        <div class="container header-inner">
+            <a href="#" class="logo-group">
+                <div class="logo-icon-wrapper"><span>E</span></div>
+                <h1 class="logo-text">이화마켓</h1>
+            </a>
+            <nav class="header-nav">
+                <button class="btn btn-green">판매하기</button>
+                <button class="btn btn-white">찜</button>
+                <button class="header-icon-button">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <use href="#icon-user"></use>
+                    </svg>
+                </button>
+            </nav>
+        </div>
+    </header>
+>>>>>>> Week10
 
 {% block section %}
     <div class="auth-container">
@@ -17,12 +66,17 @@
                     <div class="form-group">
                         <label for="user-id" class="form-label">아이디 (필수)</label>
                         <div class="form-group-with-button">
+<<<<<<< HEAD
                             <input type="text" id="user-id" name="id" class="form-input">
+=======
+                            <input type="text" id="user-id" name="id" class="form-input" required>
+>>>>>>> Week10
                             <button type="button" id="check-btn" class="form-inline-button">중복확인</button>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="password" class="form-label">비밀번호 (필수)</label>
+<<<<<<< HEAD
                         <input type="password" id="password" name="pw" class="form-input">
                     </div>
                     <div class="form-group">
@@ -32,6 +86,17 @@
                     <div class="form-group">
                         <label for="email" class="form-label">이메일 주소 (필수)</label>
                         <input type="email" id="email" name="email" class="form-input">
+=======
+                        <input type="password" id="password" name="pw" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password-confirm" class="form-label">비밀번호 확인</label>
+                        <input type="password" id="password-confirm" name="pw_confirm" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email" class="form-label">이메일 주소 (필수)</label>
+                        <input type="email" id="email" name="email" class="form-input" required>
+>>>>>>> Week10
                     </div>
                     <div class="form-group">
                         <label for="phone" class="form-label">핸드폰 번호 (선택)</label>
@@ -47,7 +112,59 @@
             </div>
         </div>
     </div>
+<<<<<<< HEAD
 {% endblock %}
+=======
+    
+    <script>
+        // 폼 제출 시 유효성 검사
+        function validateAndSubmit(e) {
+            const userId = document.getElementById('user-id').value.trim();
+            const password = document.getElementById('password').value;
+            const passwordConfirm = document.getElementById('password-confirm').value;
+            const email = document.getElementById('email').value.trim();
+            
+            if (!userId || !password || !email) {
+                alert('아이디, 비밀번호, 이메일은 필수 입력 항목입니다.');
+                return false; // 폼 제출 중단
+            }
+            if (password !== passwordConfirm) {
+                alert('비밀번호가 일치하지 않습니다.');
+                return false; // 폼 제출 중단
+            }
+            // 모든 검사 통과 시 폼 제출
+            return true;
+        }
+
+        // ID 중복확인 버튼 핸들러
+        document.getElementById('check-btn').addEventListener('click', async function () {
+            const userId = document.getElementById('user-id').value.trim();
+            if (!userId) {
+                alert('아이디를 입력하세요.');
+                return;
+            }
+            try {
+                // 백엔드 API (/api/check_userid) 호출
+                const resp = await fetch('/api/check_userid?userid=' + encodeURIComponent(userId));
+                const data = await resp.json();
+                
+                if (resp.ok) {
+                    if (data.available) {
+                        alert('사용 가능한 아이디입니다.');
+                    } else {
+                        alert('이미 존재하는 아이디입니다. 다른 아이디를 선택하세요.');
+                    }
+                } else {
+                    alert(data.message || '중복확인 실패');
+                }
+            } catch (e) {
+                console.error('중복확인 API 오류:', e);
+                alert('중복확인 중 오류가 발생했습니다.');
+            }
+        });
+    </script>
+    </body>
+>>>>>>> Week10
 
 {% block scripts %}
     <script>
