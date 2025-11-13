@@ -30,6 +30,12 @@
         <h1 class="logo-text">이화마켓</h1>
       </div>
       <nav class="header-nav">
+        {% if user_id%}
+        <span><b>{{  user_id  }}</b>님 반갑습니다!</span>
+        <a href="/logout" class="btn btn-white">logout</a>
+        {%else%}
+        <a href="/login.html" class="btn btn-white">login</a>
+        {%endif%}
         <button class="btn btn-green">판매하기</button>
         <button class="btn btn-white">찜</button>
         <button class="header-icon-button" aria-label="로그인">
