@@ -1,12 +1,10 @@
 import pyrebase
 import json
-import hashlib
-import os
 
 class DBhandler:
     def __init__(self):
         # app.py가 backend 폴더에 있다고 가정하고 경로 설정
-        with open('./backend/authentication/firebase_auth.json') as f:
+        with open('./authentication/firebase_auth.json') as f:
             config = json.load(f)
         
         firebase = pyrebase.initialize_app(config)
@@ -53,19 +51,13 @@ class DBhandler:
         else:
             print(f"Error: User ID {data.get('id')} already exists.")
             return False
-        
-    # 상품 정보 삽입 함수
-    def insert_item(self, name, data, img_path):
-        item_info = {
-            "title": data.get("title"),
-            "price": data.get("price"),
-            "region": data.get("region"),
-            "status": data.get("status"),
-            "desc": data.get("desc"),
-            "author": "ewhaosp", # 임시 작성자
-            "img_path": img_path
-        }
-        # item 노드에 상품 정보 저장
-        self.db.child("item").child(name).set(item_info)
-        print("✅ Firebase Save Success:", item_info)
-        return True
+    
+    def find_user(self,id_,pw_):
+        users = self.db.child("user").get()
+       
+        for res in users.each():
+            value = res.val()
+            if value['id']==id_ and value['pw']==pw_:
+                return True
+            
+        return False
