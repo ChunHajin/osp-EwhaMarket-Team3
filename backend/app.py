@@ -79,7 +79,7 @@ def login_user():
 @app.route("/logout")
 def logout():
     session.pop('id', None)
-    return redirect(url_for('login_page'))
+    return redirect(url_for('product_list'))
 
 
 # 1. ID 중복 확인 API (signup.html의 fetch 요청 처리)

@@ -1,24 +1,28 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
+
     <title>{% block title %}이화마켓{% endblock %}</title>
-    
+
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/common.css">
 
     {% block styles %}
     {% endblock %}
 </head>
+
 <body>
     <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
         <symbol id="icon-heart" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364 l7.682-7.682a4.5 4.5 0 00-6.364-6.364 L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364 l7.682-7.682a4.5 4.5 0 00-6.364-6.364 L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
         </symbol>
         <symbol id="icon-user" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0z M12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0z M12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
         </symbol>
     </svg>
 
@@ -30,18 +34,25 @@
             </a>
             <nav class="header-nav">
                 {% if user_id %}
-                  <span><b>{{ user_id }}</b>님 반갑습니다!</span>
-                  <a href="/logout" class="btn btn-white">logout</a>
+                <span><b>{{ user_id }}</b>님 반갑습니다!</span>
                 {% else %}
-                  <a href="/login.html" class="btn btn-white">login</a>
-                {% endif %}   
+                <span>로그인 후 이용해주세요!</span>
+                {% endif %}
                 <a href="/product-create.html" class="btn btn-green">판매하기</a>
                 <a href="/product-wishlist.html" class="btn btn-white">찜</a>
+                {% if user_id %}
+                <a href="/mypage.html" class="header-icon-button">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <use href="#icon-user"></use>
+                    </svg>
+                </a>
+                {% else %}
                 <a href="/login.html" class="header-icon-button">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <use href="#icon-user"></use>
                     </svg>
                 </a>
+                {% endif %}
             </nav>
         </div>
     </header>
@@ -52,4 +63,5 @@
     {% block scripts %}
     {% endblock %}
 </body>
+
 </html>

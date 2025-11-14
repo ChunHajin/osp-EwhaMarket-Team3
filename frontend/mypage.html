@@ -4,6 +4,7 @@
 
 {% block styles %}
     <link rel="stylesheet" href="css/mypage.css">
+    <link rel="stylesheet" href="css/product-list.css">
 {% endblock %}
 
 {% block section %}
@@ -16,14 +17,14 @@
             </label>
             <input type="file" id="profile-img-upload" accept="image/*" style="display: none;">
 
-            <h3 class="my-name">hajin</h3>
+            <h3 class="my-name">{{ user_id | default('사용자') }}</h3>
             <p class="seller-info">
                 <span class="product-state" id="available">판매 중 3</span>
                 <span class="product-state" id="sold">판매 완료 1</span>
             </p>
 
             <button class="btn btn-green btn-full">개인정보 변경</button>
-            <button class="btn btn-white btn-full">로그아웃</button>
+            <button class="btn btn-white btn-full"><a href="/logout">로그아웃</a></button>
             <a href="#" class="link-withdraw">회원 탈퇴</a>
         </div>
 
