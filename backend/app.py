@@ -60,6 +60,28 @@ def review_page():
 def mypage():
     return render_template('mypage.html')
 
+@app.route("/api/login_confirm", methods=['POST'])
+def login_user():
+    id_ = request.form.get('id')
+    pw = request.form.get('pw')
+
+    if not id_ or not pw:
+        return jsonify({"success": False, "message": "필수 값 누락"}), 400
+
+    pw_hash = hashlib.sha256(pw.encode('utf-8')).hexdigest()
+
+    if DB.find_user(id_, pw_hash):
+        session['id'] = id_
+        return jsonify({"success": True})
+    else:
+        return jsonify({"success": False, "message": "아이디 또는 비밀번호를 다시 입력하세요."}), 401
+
+@app.route("/logout")
+def logout():
+    session.pop('id', None)
+    return redirect(url_for('login_page'))
+
+
 # 1. ID 중복 확인 API (signup.html의 fetch 요청 처리)
 @app.route("/api/check_userid", methods=['GET'])
 def check_userid():
@@ -130,6 +152,9 @@ def submit_item_post():
     except Exception as e:
         return f"<h3>❌ 오류 발생: {e}</h3>", 500
     
+@app.context_processor
+def inject_user():
+    return dict(user_id=session.get('id'))
 
 if __name__ == "__main__":
     # 두 가지 방법으로 실행 가능

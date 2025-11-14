@@ -54,6 +54,16 @@ class DBhandler:
             print(f"Error: User ID {data.get('id')} already exists.")
             return False
         
+    def find_user(self, id_, pw_hash):
+        users = self.db.child("user").get()
+        if not users.val():
+            return False
+        for user in users.each():
+            value = user.val()
+            if value.get('id') == id_ and value.get('pw') == pw_hash:
+                return True
+        return False
+        
     # 상품 정보 삽입 함수
     def insert_item(self, name, data, img_path):
         item_info = {

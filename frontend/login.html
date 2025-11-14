@@ -10,16 +10,54 @@
     <main class="main-content">
         <div class="login-container card">
             <h2 class="login-title">로그인</h2>
-            <form>
+            <form id="login-form" method="post" action="/api/login_confirm">
                 <div class="form-group">
-                    <input class="form-input" type="text" placeholder="아이디">
+                    <input id="user-id" name="id" class="form-input" type="text" placeholder="아이디" required>
                 </div>
                 <div class="form-group">
-                    <input class="form-input" type="password" placeholder="비밀번호">
+                    <input id="user-pw" name="pw" class="form-input" type="password" placeholder="비밀번호" required>
                  </div>
-                  <button class="btn btn-green btn-full btn-large">로그인</button>
+                  <button type="submit" class="btn btn-green btn-full btn-large">로그인</button>
         <p class="signup-link">계정이 없으신가요? <a href="signup.html">회원가입</a></p>
             </form>
         </div>
     </main>
+
+ <script>
+  document.getElementById("login-form").addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const id = document.getElementById("user-id").value.trim();
+  const pw = document.getElementById("user-pw").value.trim();
+
+  if (!id || !pw) {
+    alert("아이디와 비밀번호를 모두 입력하세요.");
+    return;
+  }
+
+  try {
+    const resp = await fetch("/api/login_confirm", {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: new URLSearchParams({ id, pw })
+    });
+
+    const data = await resp.json();
+
+    if (resp.ok && data.success) {
+      alert("로그인 성공! 상품 목록으로 이동합니다.");
+      window.location.href = "/product-list.html";
+    } else {
+      alert(data.message || "아이디 또는 비밀번호를 확인하세요.");
+    }
+  } catch (err) {
+    console.error("로그인 오류:", err);
+    alert("서버 오류가 발생했습니다. 다시 시도해주세요.");
+  }
+  });
+
+  </script>
 {% endblock %}
