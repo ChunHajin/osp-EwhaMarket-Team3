@@ -22,9 +22,9 @@
 
         <div class="field">
           <label>작성자 아이디</label>
-          <div class="control control-static">ewhaosp</div>
+          <div class="control control-static">{{ user_id | default('로그인 필요') }}</div>
         </div>
-
+                
         <div class="field">
           <label for="price">가격</label>
           <div class="control">
@@ -33,11 +33,35 @@
         </div>
 
         <div class="field">
+          <label for="category">카테고리</label>
+          <div class="control">
+            <select id="category" name="category" class="form-input" required>
+              <option value="" selected disabled>선택</option>
+              <option>전공서적</option>
+              <option>전자기기</option>
+              <option>생활용품</option>
+              <option>의류/잡화</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
           <label for="region">지역</label>
           <div class="control">
             <select id="region" name="region" class="form-input">
               <option value="" selected disabled>선택</option>
-              <option>ECC</option><option>정문</option><option>후문</option><option>신촌</option><option>기타</option>
+              <option>ECC</option><option>정문</option><option>후문</option><option>신촌</option><option>기타</option><option value="">선택 안함</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="trade_method">거래방식</label>
+          <div class="control">
+            <select id="trade_method" name="trade_method" class="form-input">
+              <option value="" selected disabled>선택</option>
+              <option>직거래</option>
+              <option>택배</option>
             </select>
           </div>
         </div>

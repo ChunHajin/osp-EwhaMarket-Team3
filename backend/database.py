@@ -64,18 +64,44 @@ class DBhandler:
                 return True
         return False
         
+    # 상품 정보 가져오는 함수
+    def get_items(self):
+        """
+        Firebase의 'item' 노드 아래 모든 상품 데이터를 가져옵니다.
+        """
+        items = self.db.child("item").get().val()
+        return items
+
+    # 특정 상품 정보 가져오는 함수
+    def get_item_byname(self, name):
+        """
+        상품 이름(key)을 이용해 'item' 노드에서 특정 상품 데이터를 찾습니다.
+        """
+        items = self.db.child("item").get()
+        
+        if not items.val():
+            return None
+            
+        for res in items.each():
+            key_value = res.key()
+            if key_value == name:
+                return res.val()
+        
+        return None
+
     # 상품 정보 삽입 함수
-    def insert_item(self, name, data, img_path):
+    def insert_item(self, name, data, img_path, author_id, trade_method):
         item_info = {
             "title": data.get("title"),
             "price": data.get("price"),
             "region": data.get("region"),
             "status": data.get("status"),
             "desc": data.get("desc"),
-            "author": "ewhaosp", # 임시 작성자
-            "img_path": img_path
+            "author": author_id,
+            "img_path": img_path,
+            "category": data.get("category"),
+            "trade_method": data.get("trade_method")
         }
-        # item 노드에 상품 정보 저장
         self.db.child("item").child(name).set(item_info)
         print("✅ Firebase Save Success:", item_info)
         return True

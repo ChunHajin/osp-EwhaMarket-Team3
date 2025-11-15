@@ -20,10 +20,6 @@ def home():
     # 화면 이동 구현 안 된 페이지의 경우 주소창에서 html 파일명 직접 수정해 접속
     return redirect(url_for('product_list'))
 
-@app.route('/product-list.html')
-def product_list():
-    return render_template("product-list.html")
-
 @app.route('/signup.html')
 def signup_page():
     return render_template("signup.html")
@@ -31,10 +27,6 @@ def signup_page():
 @app.route('/login.html')
 def login_page():
     return render_template("login.html")
-
-@app.route('/product-detail.html')
-def product_detail():
-    return render_template('product-detail.html')
 
 @app.route('/product-create.html')
 def product_create():
@@ -128,17 +120,19 @@ def submit_item_post():
         img_path = ""
         if image_file and image_file.filename:
             # 이미지를 저장할 경로 설정
-            save_dir = os.path.join(os.getcwd(), "backend", "static", "images")
+            save_dir = os.path.join(os.getcwd(), "frontend", "uploads")
             os.makedirs(save_dir, exist_ok=True) # 폴더가 없으면 생성
-            img_path = f"static/images/{image_file.filename}"
+            img_path = f"uploads/{image_file.filename}"
             image_file.save(os.path.join(save_dir, image_file.filename))
 
         # 2. 폼 데이터 수집
         data = request.form
         key_name = data.get("title", "unnamed_item")
+        author_id = session.get('id', 'unknown_user')
+        trade_method = data.get('trade_method')
 
         # 3. Firebase에 저장 (새로 추가된 DB 함수 호출)
-        DB.insert_item(key_name, data, img_path)
+        DB.insert_item(key_name, data, img_path, author_id, trade_method)
 
         # 4. 성공 페이지 반환
         return f"""
@@ -151,7 +145,44 @@ def submit_item_post():
 
     except Exception as e:
         return f"<h3>❌ 오류 발생: {e}</h3>", 500
+
+@app.route('/product-list.html')
+def product_list():
+    page = request.args.get("page", 1, type=int) 
+    per_page = 4 
+    start_idx = per_page * (page - 1)
+    end_idx = per_page * page
+    data = DB.get_items() 
     
+    if not data:
+        data = {}
+
+    item_counts = len(data)
+    page_count = (item_counts + per_page - 1) // per_page
+    datas_for_page = dict(list(data.items())[start_idx:end_idx])
+
+    return render_template(
+        "product-list.html", 
+        datas=datas_for_page.items(),
+        total=item_counts,
+        page=page,
+        page_count=page_count 
+    )
+
+@app.route('/product-detail.html')
+def product_detail_static():
+    return render_template('product-detail.html')
+
+@app.route('/product-detail/<name>')
+def product_detail(name):
+    
+    data = DB.get_item_byname(str(name))
+    
+    if data:
+        return render_template('product-detail.html', name=name, data=data)
+    else:
+        return "상품을 찾을 수 없습니다.", 404
+
 @app.context_processor
 def inject_user():
     return dict(user_id=session.get('id'))
