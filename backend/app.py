@@ -148,16 +148,26 @@ def submit_item_post():
 
 @app.route('/product-list.html')
 def product_list():
+    page = request.args.get("page", 1, type=int) 
+    per_page = 4 
+    start_idx = per_page * (page - 1)
+    end_idx = per_page * page
     data = DB.get_items() 
     
-    items = {}
-    if data:
-        items = data.items()
-    tot_count = len(items)
-    
-    return render_template("product-list.html", 
-                         datas=items, 
-                         total=tot_count)
+    if not data:
+        data = {}
+
+    item_counts = len(data)
+    page_count = (item_counts + per_page - 1) // per_page
+    datas_for_page = dict(list(data.items())[start_idx:end_idx])
+
+    return render_template(
+        "product-list.html", 
+        datas=datas_for_page.items(),
+        total=item_counts,
+        page=page,
+        page_count=page_count 
+    )
 
 @app.route('/product-detail.html')
 def product_detail_static():
