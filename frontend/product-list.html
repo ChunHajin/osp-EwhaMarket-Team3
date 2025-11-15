@@ -19,74 +19,54 @@
     </div>
 
     <div class="product-grid">
-      <div class="product-card">
-        <div class="product-card-image"></div>
-        <div class="product-card-content">
-          <span class="tag-status tag-status-great">상태 최상</span>
-          <h3 class="product-title">점프 투 파이썬 팝니다</h3>
-          <div><span class="tag-info">#학관</span><span class="tag-info">#직거래</span></div>
-          <div class="product-meta-row">
-            <p class="product-price">12,000원</p>
-            <div class="like-info">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="like-icon">
-                <use href="#icon-heart"></use>
-              </svg>
-              <span>5</span>
+      {% if total > 0 %}
+        {% for key, value in datas %}
+          
+          <a href="{{ url_for('product_detail', name=key) }}" style="text-decoration: none; color: inherit;">
+          
+            <div class="product-card">
+              
+              <div class="product-card-image">
+                {% if value.img_path %}
+                  <img src="{{ value.img_path }}" alt="{{ value.title }}" style="width:100%; height:100%; object-fit:cover;">
+                {% endif %}
+              </div>
+              
+              <div class="product-card-content">
+                {% set status_class = 'tag-status-used' %} {% if value.status == "상태 최상" %}
+                    {% set status_class = 'tag-status-great' %}
+                {% elif value.status == "약간의 하자" %}
+                    {% set status_class = 'tag-status-defect' %}
+                {% endif %}
+
+                <span class="tag-status {{ status_class }}">
+                    {{ value.status | default('상태 없음') }}
+                </span>
+                
+                <h3 class="product-title">{{ value.title | default(key) }}</h3>   
+                             
+                <div>
+                  {% if value.region %}<span class="tag-info">#{{ value.region }}</span>{% endif %}
+                  {% if value.trade_method %}<span class="tag-info">#{{ value.trade_method }}</span>{% endif %}
+                </div>
+
+                <div class="product-meta-row">
+                  <p class="product-price">{{ value.price | default(0) | int }}원</p>
+                  <div class="like-info">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="like-icon">
+                      <use href="#icon-heart"></use>
+                    </svg>
+                    <span>0</span> </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
-      <div class="product-card">
-        <div class="product-card-image"></div>
-        <div class="product-card-content">
-          <span class="tag-status tag-status-defect">약간의 하자</span>
-          <h3 class="product-title">무선 마우스 팝니다</h3>
-          <div><span class="tag-info">#택배</span></div>
-          <div class="product-meta-row">
-            <p class="product-price">25,000원</p>
-            <div class="like-info">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="like-icon">
-                <use href="#icon-heart"></use>
-              </svg>
-              <span>3</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="product-card">
-        <div class="product-card-image"></div>
-        <div class="product-card-content">
-          <span class="tag-status tag-status-used">사용감 있음</span>
-          <h3 class="product-title">이화상점 텀블러</h3>
-          <div><span class="tag-info">#ECC</span><span class="tag-info">#직거래</span></div>
-          <div class="product-meta-row">
-            <p class="product-price">5,000원</p>
-            <div class="like-info">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="like-icon">
-                <use href="#icon-heart"></use>
-              </svg>
-              <span>1</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="product-card product-card--sold">
-        <div class="product-card-image"></div>
-        <div class="product-card-content">
-          <span class="tag-status tag-status-great">상태 최상</span>
-          <h3 class="product-title">갤럭시 버즈3 화이트</h3>
-          <div><span class="tag-info">#택배</span></div>
-          <div class="product-meta-row">
-            <p class="product-price">80,000원</p>
-            <div class="like-info">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="like-icon">
-                <use href="#icon-heart"></use>
-              </svg>
-              <span>8</span>
-            </div>
-          </div>
-        </div>
-      </div>
+
+          </a> {% endfor %}
+      
+      {% else %}
+        <p style="text-align: center; grid-column: 1 / -1;">등록된 상품이 없습니다.</p>
+      {% endif %}
+      
     </div>
 
     <div class="pagination">

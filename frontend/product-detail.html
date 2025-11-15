@@ -3,7 +3,7 @@
 {% block title %}상품 상세 | 이화마켓{% endblock %}
 
 {% block styles %}
-    <link rel="stylesheet" href="css/product-detail.css">
+    <link rel="stylesheet" href="/css/product-detail.css">
 {% endblock %}
 
 {% block section %}
@@ -11,7 +11,11 @@
     <div class="card">
       <div class="detail-grid">
         <div>
-          <div class="product-image-main"></div>
+          <div class="product-image-main">
+            {% if data.img_path %}
+              <img src="/{{ data.img_path }}" alt="{{ data.title }}" style="width:100%; height:100%; object-fit:cover;">
+            {% endif %}
+          </div>
           <div class="product-image-gallery">
             <div class="product-image-thumb product-image-thumb-active"></div>
             <div class="product-image-thumb"></div>
@@ -22,23 +26,21 @@
           <div class="seller-info">
             <div class="seller-avatar"></div>
             <div>
-              <p class="seller-name">hajin</p>
-              <p class="seller-location">서울 서대문구 대신동</p>
-            </div>
+              <p class="seller-name">{{ data.author | default('판매자') }}</p>
+              <p class="seller-location">서울 서대문구 대신동</p> </div>
           </div>
 
-          <h1 class="product-title">점프 투 파이썬 팝니다</h1>
-          <p class="product-meta">전공서적 ・ 3시간 전</p>
-          <p class="product-price">12,000원</p>
+          <h1 class="product-title">{{ data.title | default(name) }}</h1>
+          <p class="product-meta">{{ data.category | default('전체') }} ・ 3시간 전</p> <p class="product-price">{{ data.price | default(0) | int }}원</p>
 
           <div class="product-description-container">
             <h2 class="product-description-title">상품설명</h2>
-            <p class="product-description-text">수업 때 거의 사용하지 않아 필기감 없는 새 책입니다.</p>
+            <p class="product-description-text">{{ data.desc | default('설명 없음') }}</p>
           </div>
 
           <div class="product-info-grid">
-            <div><span class="product-info-label">상품 상태:</span> 상태 최상</div>
-            <div><span class="product-info-label">거래 방식:</span> 직거래</div>
+            <div><span class="product-info-label">상품 상태:</span> {{ data.status | default('N/A') }}</div>
+            <div><span class="product-info-label">거래 방식:</span> {{ data.region }} {{ data.trade_method | default('N/A') }}</div>
           </div>
 
           <div class="button-group">

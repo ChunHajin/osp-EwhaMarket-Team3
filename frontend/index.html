@@ -8,7 +8,7 @@
     <title>{% block title %}이화마켓{% endblock %}</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="/css/common.css">
 
     {% block styles %}
     {% endblock %}
@@ -35,11 +35,16 @@
             <nav class="header-nav">
                 {% if user_id %}
                 <span><b>{{ user_id }}</b>님 반갑습니다!</span>
+                <a href="/product-create.html" class="btn btn-green">판매하기</a>
+                
                 {% else %}
                 <span>로그인 후 이용해주세요!</span>
+                <a href="/login.html" class="btn btn-green" onclick="alert('로그인 후 이용해주세요.');">판매하기</a>
+                
                 {% endif %}
-                <a href="/product-create.html" class="btn btn-green">판매하기</a>
+                
                 <a href="/product-wishlist.html" class="btn btn-white">찜</a>
+                
                 {% if user_id %}
                 <a href="/mypage.html" class="header-icon-button">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
