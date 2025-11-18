@@ -50,7 +50,26 @@ def review_page():
 
 @app.route('/mypage.html')
 def mypage():
-    return render_template('mypage.html')
+    if 'id' not in session:
+        return redirect(url_for('login_page'))
+    
+    user_id = session['id']
+    
+    # 전체 상품 가져오기
+    all_items = DB.get_items()
+    if not all_items:
+        all_items = {}
+    
+    # 내 판매 상품 (작성자가 나인 경우)
+    my_sales = {k: v for k, v in all_items.items() if v.get('author') == user_id}
+    
+    # 내 구매 상품 (구매자가 나인 경우)
+    my_purchases = {k: v for k, v in all_items.items() if v.get('buyer') == user_id}
+    
+    return render_template('mypage.html', 
+                           user_id=user_id, 
+                           my_sales=my_sales.items(), 
+                           my_purchases=my_purchases.items())
 
 @app.route("/api/login_confirm", methods=['POST'])
 def login_user():
@@ -186,6 +205,22 @@ def product_detail(name):
 @app.context_processor
 def inject_user():
     return dict(user_id=session.get('id'))
+
+@app.route("/api/purchase", methods=['POST'])
+def purchase_item_api():
+    # 1. 로그인 여부 확인
+    if 'id' not in session:
+        return jsonify({"success": False, "message": "로그인이 필요합니다."}), 401
+    
+    data = request.get_json()
+    item_name = data.get('item_name')
+    buyer_id = session['id']
+    
+    # 2. DB 업데이트 요청
+    if DB.purchase_item(item_name, buyer_id):
+        return jsonify({"success": True})
+    else:
+        return jsonify({"success": False, "message": "구매 처리에 실패했습니다."}), 500
 
 if __name__ == "__main__":
     # 두 가지 방법으로 실행 가능

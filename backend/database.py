@@ -105,3 +105,18 @@ class DBhandler:
         self.db.child("item").child(name).set(item_info)
         print("✅ Firebase Save Success:", item_info)
         return True
+
+    def purchase_item(self, name, buyer_id):
+        """
+        상품 구매 처리: 구매자 ID 등록 및 상태를 '거래 완료'로 변경
+        """
+        update_data = {
+            "buyer": buyer_id,
+            "status": "거래 완료"
+        }
+        try:
+            self.db.child("item").child(name).update(update_data)
+            return True
+        except Exception as e:
+            print(f"Purchase Error: {e}")
+            return False
