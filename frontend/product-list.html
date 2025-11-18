@@ -22,9 +22,13 @@
       {% if total > 0 %}
         {% for key, value in datas %}
           
-          <a href="{{ url_for('product_detail', name=key) }}" style="text-decoration: none; color: inherit;">
-          
-            <div class="product-card">
+            {% set is_sold = (value.status == 'sold' or value.status == '판매 완료') %}
+            {% if not is_sold %}
+              <a href="{{ url_for('product_detail', name=key) }}" style="text-decoration: none; color: inherit;">
+                <div class="product-card">
+            {% else %}
+                <div class="product-card product-card--sold" role="button" aria-disabled="true" tabindex="0">
+            {% endif %}
               
               <div class="product-card-image">
                 {% if value.img_path %}
@@ -33,14 +37,20 @@
               </div>
               
               <div class="product-card-content">
-                {% set status_class = 'tag-status-used' %} {% if value.status == "상태 최상" %}
-                    {% set status_class = 'tag-status-great' %}
+                {% set status_class = 'tag-status-used' %}
+                {% if value.status == "상태 최상" %}
+                  {% set status_class = 'tag-status-great' %}
                 {% elif value.status == "약간의 하자" %}
-                    {% set status_class = 'tag-status-defect' %}
+                  {% set status_class = 'tag-status-defect' %}
+                {% endif %}
+
+                {% set display_status = value.status | default('상태 없음') %}
+                {% if value.status == 'sold' or value.status == '판매 완료' %}
+                  {% set display_status = '판매 완료' %}
                 {% endif %}
 
                 <span class="tag-status {{ status_class }}">
-                    {{ value.status | default('상태 없음') }}
+                  {{ display_status }}
                 </span>
                 
                 <h3 class="product-title">{{ value.title | default(key) }}</h3>   
@@ -60,8 +70,10 @@
                 </div>
               </div>
             </div>
-
-          </a> {% endfor %}
+            {% if not is_sold %}
+              </a>
+            {% endif %}
+          {% endfor %}
       
       {% else %}
         <p style="text-align: center; grid-column: 1 / -1;">등록된 상품이 없습니다.</p>

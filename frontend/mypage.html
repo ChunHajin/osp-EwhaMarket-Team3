@@ -3,117 +3,150 @@
 {% block title %}마이페이지 | 이화마켓{% endblock %}
 
 {% block styles %}
-    <link rel="stylesheet" href="css/mypage.css">
-    <link rel="stylesheet" href="css/product-list.css">
+<link rel="stylesheet" href="css/mypage.css">
+<link rel="stylesheet" href="css/product-list.css">
 {% endblock %}
 
 {% block section %}
-    <main class="main-content container">
-        
-        <div class="card profile">
-            <label for="profile-img-upload" class="my-img-area">
-                <div class="my-img"></div>
-                <span class="change-photo-text">사진<br>변경</span>
-            </label>
-            <input type="file" id="profile-img-upload" accept="image/*" style="display: none;">
+<main class="main-content container">
 
-            <h3 class="my-name">{{ user_id | default('사용자') }}</h3>
-            <p class="seller-info">
-                <span class="product-state" id="available">판매 중 3</span>
-                <span class="product-state" id="sold">판매 완료 1</span>
-            </p>
+    <div class="card profile">
+        <label for="profile-img-upload" class="my-img-area">
+            <div class="my-img"></div>
+            <span class="change-photo-text">사진<br>변경</span>
+        </label>
+        <input type="file" id="profile-img-upload" accept="image/*" style="display: none;">
 
-            <button class="btn btn-green btn-full">개인정보 변경</button>
-            <button class="btn btn-white btn-full"><a href="/logout">로그아웃</a></button>
-            <a href="#" class="link-withdraw">회원 탈퇴</a>
+        <h3 class="my-name">{{ user_id | default('사용자') }}</h3>
+        <p class="seller-info">
+            <span class="product-state" id="available">판매 중 3</span>
+            <span class="product-state" id="sold">판매 완료 1</span>
+        </p>
+
+        <button class="btn btn-green btn-full">개인정보 변경</button>
+        <button class="btn btn-white btn-full"><a href="/logout">로그아웃</a></button>
+        <a href="#" class="link-withdraw">회원 탈퇴</a>
+    </div>
+
+    <div class="activity-section">
+        <div class="category-filter mypage-tabs">
+            <button id="tab-sales" class="btn-pill btn-pill-active" onclick="switchTab('sales')">내 판매 상품</button>
+            <button id="tab-purchases" class="btn-pill btn-pill-inactive" onclick="switchTab('purchases')">내 구매
+                상품</button>
+        </div>
+        <div id="list-sales" class="product-grid">
+            {% if my_sales|length > 0 %}
+            {% for key, item in my_sales %}
+
+            {% set status_class = 'tag-status-used' %}
+            {% if item.status == "상태 최상" %}
+            {% set status_class = 'tag-status-great' %}
+            {% elif item.status == "약간의 하자" %}
+            {% set status_class = 'tag-status-defect' %}
+            {% endif %}
+
+            <div class="product-card {{ 'product-card--sold' if item.status == 'sold' else '' }}">
+                <div class="product-card-image">
+                    {% if item.img_path %}
+                    <img src="{{ item.img_path }}" alt="{{ item.title }}"
+                        style="width:100%; height:100%; object-fit:cover;">
+                    {% endif %}
+                </div>
+                <div class="product-card-content">
+                    <span class="tag-status {{ status_class }}">
+                        {{ item.status | default('상태 없음') }}
+                    </span>
+
+                    <h3 class="product-title">{{ item.title }}</h3>
+                    <div><span class="tag-info">#{{ item.trade_method }}</span></div>
+                    <div class="product-meta-row">
+                        <p class="product-price">{{ item.price }}원</p>
+                    </div>
+                    <div class="manage-buttons">
+                        <button class="btn-text-small">수정</button> |
+                        <button class="btn-text-small">삭제</button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p style="padding: 20px; grid-column: 1 / -1;">판매 내역이 없습니다.</p>
+            {% endif %}
         </div>
 
-        <div class="activity-section">
-            <div class="category-filter mypage-tabs">
-                <button class="btn-pill btn-pill-active">내 판매 상품</button>
-                <button class="btn-pill btn-pill-inactive">내 구매 상품</button>
-            </div>
+        <div id="list-purchases" class="product-grid" style="display: none;">
+            {% if my_purchases|length > 0 %}
+            {% for key, item in my_purchases %}
 
-            <div class="product-grid">
-                
-                <div class="product-card">
-                    <div class="product-card-image"></div>
-                    <div class="product-card-content">
-                        <span class="tag-status tag-status-great">상태 최상</span>
-                        <h3 class="product-title">점프 투 파이썬 팝니다</h3>
-                        <div><span class="tag-info">#학관</span><span class="tag-info">#직거래</span></div>
-                        <div class="product-meta-row">
-                            <p class="product-price">12,000원</p>
-                            <div class="like-info">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="like-icon">
-                                    <use href="#icon-heart"></use>
-                                </svg>
-                                <span>5</span>
-                            </div>
-                        </div>
-                        <div class="manage-buttons">
-                            <button class="btn-text-small">수정</button> |
-                            <button class="btn-text-small">삭제</button> |
-                            <button class="btn-text-small btn-green-text">거래 상태 변경</button>
-                        </div>
-                    </div>
+            {% set status_class = 'tag-status-used' %}
+            {% if item.status == "상태 최상" %}
+            {% set status_class = 'tag-status-great' %}
+            {% elif item.status == "약간의 하자" %}
+            {% set status_class = 'tag-status-defect' %}
+            {% endif %}
+
+            <div class="product-card">
+                <div class="product-card-image">
+                    {% if item.img_path %}
+                    <img src="{{ item.img_path }}" alt="{{ item.title }}"
+                        style="width:100%; height:100%; object-fit:cover;">
+                    {% endif %}
                 </div>
-                
-                <div class="product-card">
-                    <div class="product-card-image"></div>
-                    <div class="product-card-content">
-                        <span class="tag-status tag-status-used">사용감 있음</span>
-                        <h3 class="product-title">이화상점 텀블러</h3>
-                        <div><span class="tag-info">#ECC</span><span class="tag-info">#직거래</span></div>
-                        <div class="product-meta-row">
-                            <p class="product-price">5,000원</p>
-                            <div class="like-info">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="like-icon">
-                                    <use href="#icon-heart"></use>
-                                </svg>
-                                <span>1</span>
-                            </div>
-                        </div>
-                        <div class="manage-buttons">
-                            <button class="btn-text-small">수정</button> |
-                            <button class="btn-text-small">삭제</button> |
-                            <button class="btn-text-small btn-green-text">거래 상태 변경</button>
-                        </div>
+                <div class="product-card-content">
+                    <span class="tag-status {{ status_class }}">
+                        {{ item.status }}
+                    </span>
+                    <h3 class="product-title">{{ item.title }}</h3>
+                    <div><span class="tag-info">#{{ item.author }}님에게 구매</span></div>
+                    <div class="product-meta-row">
+                        <p class="product-price">{{ item.price }}원</p>
                     </div>
-                </div>
-                
-                <div class="product-card">
-                    <div class="product-card-image"></div>
-                    <div class="product-card-content">
-                        <span class="tag-status tag-status-great">상태 최상</span>
-                        <h3 class="product-title">갤럭시 버즈3 화이트</h3>
-                        <div><span class="tag-info">#택배</span></div>
-                        <div class="product-meta-row">
-                            <p class="product-price">80,000원</p>
-                            <div class="like-info">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="like-icon">
-                                    <use href="#icon-heart"></use>
-                                </svg>
-                                <span>8</span>
-                            </div>
-                        </div>
-                        <div class="manage-buttons">
-                            <button class="btn-text-small">수정</button> |
-                            <button class="btn-text-small">삭제</button> |
-                            <button class="btn-text-small btn-green-text">거래 상태 변경</button>
-                        </div>
+                    <div class="manage-buttons">
+                        <a href="/review-write.html" class="btn-text-small btn-green-text">리뷰 작성</a>
                     </div>
                 </div>
             </div>
-            <div class="pagination">
-                <nav aria-label="Page navigation">
-                    <ul class="pagination-list">
-                        <li><a href="#" aria-current="page" class="active">1</a></li>
-                        <li><a href="#">2</a></li>
-                        <li><a href="#">3</a></li>
-                    </ul>
-                </nav>
-            </div>
+            {% endfor %}
+            {% else %}
+            <p style="padding: 20px; grid-column: 1 / -1;">구매 내역이 없습니다.</p>
+            {% endif %}
         </div>
-    </main>
+        <div class="pagination">
+            <nav aria-label="Page navigation">
+                <ul class="pagination-list">
+                    <li><a href="#" aria-current="page" class="active">1</a></li>
+                    <li><a href="#">2</a></li>
+                    <li><a href="#">3</a></li>
+                </ul>
+            </nav>
+        </div>
+
+        <script>
+            function switchTab(tabName) {
+                const salesList = document.getElementById('list-sales');
+                const purchasesList = document.getElementById('list-purchases');
+                const salesBtn = document.getElementById('tab-sales');
+                const purchasesBtn = document.getElementById('tab-purchases');
+
+                if (tabName === 'sales') {
+                    salesList.style.display = 'grid';
+                    purchasesList.style.display = 'none';
+
+                    salesBtn.classList.add('btn-pill-active');
+                    salesBtn.classList.remove('btn-pill-inactive');
+                    purchasesBtn.classList.add('btn-pill-inactive');
+                    purchasesBtn.classList.remove('btn-pill-active');
+                } else {
+                    salesList.style.display = 'none';
+                    purchasesList.style.display = 'grid';
+
+                    purchasesBtn.classList.add('btn-pill-active');
+                    purchasesBtn.classList.remove('btn-pill-inactive');
+                    salesBtn.classList.add('btn-pill-inactive');
+                    salesBtn.classList.remove('btn-pill-active');
+                }
+            }
+        </script>
+    </div>
+</main>
 {% endblock %}

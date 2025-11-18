@@ -44,7 +44,7 @@
           </div>
 
           <div class="button-group">
-            <button class="btn btn-green btn-full btn-large">구매하기</button>
+            <button type="button" class="btn btn-green btn-full btn-large" onclick="requestPurchase('{{ name }}')">구매하기</button>
             <button class="btn-icon-like">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <use href="#icon-heart"></use>
@@ -55,4 +55,35 @@
       </div>
     </div>
   </main>
+
+<script>
+async function requestPurchase(itemName) {
+    if (!confirm("정말 구매하시겠습니까?")) return;
+
+    try {
+        const response = await fetch('/api/purchase', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ item_name: itemName })
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            alert("구매가 완료되었습니다! 마이페이지로 이동합니다.");
+            window.location.href = "/mypage.html";
+        } else {
+            alert(result.message || "구매 실패");
+            if (response.status === 401) {
+                window.location.href = "/login.html";
+            }
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        alert("서버 통신 중 오류가 발생했습니다.");
+    }
+}
+</script>
 {% endblock %}
