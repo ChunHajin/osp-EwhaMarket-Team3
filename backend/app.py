@@ -38,7 +38,18 @@ def product_wishlist():
 
 @app.route('/review-write.html')
 def review_write():
-    return render_template('review-write.html')
+    item_name = request.args.get('item_name')
+    user_id = session.get('id')
+
+    product_data = None
+
+    # 상품 이름으로 DB에서 상품 정보 조회
+    if item_name:
+        product_data = DB.get_item_byname(item_name)
+    
+    return render_template('review-write.html',
+                           product=product_data,
+                           writer_id=user_id)
 
 @app.route('/review-detail.html')
 def review_detail():
