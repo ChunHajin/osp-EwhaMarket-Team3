@@ -41,6 +41,10 @@ def review_write():
     item_name = request.args.get('item_name')
     user_id = session.get('id')
 
+    if not user_id:
+        return redirect(url_for('login_page'))
+    
+
     product_data = None
 
     # 상품 이름으로 DB에서 상품 정보 조회
@@ -49,15 +53,63 @@ def review_write():
     
     return render_template('review-write.html',
                            product=product_data,
+                           product_key=item_name,
                            writer_id=user_id)
+
+@app.route("/submit_review_post", methods=['POST'])
+def submit_review_post():
+    writer_id = session.get('id')
+    if not writer_id:
+        return jsonify({"success": False, "message": "로그인이 필요합니다."}), 401
+    
+    try:
+        data = request.form
+        item_name = data.get("item_name")
+
+        image_file = request.files.get("review-photos")
+        img_path = ""
+        if image_file and image_file.filename:
+            save_dir = os.path.join(os.getcwd(), "frontend", "uploads")
+            os.makedirs(save_dir, exist_ok=True)
+
+            filename_key = f"{item_name}_{writer_id}_{image_file.filename}"
+            img_path = f"uploads/{filename_key}"
+            image_file.save(os.path.join(save_dir, filename_key))
+
+            DB.reg_review(item_name, data, img_path, writer_id)
+
+            return redirect(url_for('review_page'))
+        
+    except Exception as e:
+        print(f"리뷰 등록 중 오류 발생: {e}")
+        return f"<h3>❌ 리뷰 등록 오류 발생: {e}</h3>", 500
 
 @app.route('/review-detail.html')
 def review_detail():
-    return render_template('review-detail.html')
+    item_name = request.args.get('item_name')
+    writer_id = request.args.get('writer_id')
+
+    if not item_name or not writer_id:
+        # 필수 정보 누락 시
+        return redirect(url_for('review_page'))
+    
+    data = DB.get_review_byname_and_writer(item_name, writer_id)
+    
+    if data:
+        return render_template('review-detail.html', 
+                                data=data, 
+                                item_name=item_name)
+    else:
+        return "리뷰를 찾을 수 없습니다.", 404
 
 @app.route('/review.html')
 def review_page():
-    return render_template('review.html')
+    data = DB.get_reviews() 
+    
+    if not data:
+        data = {}
+
+    return render_template('review.html', datas=data.items())
 
 @app.route('/mypage.html')
 def mypage():

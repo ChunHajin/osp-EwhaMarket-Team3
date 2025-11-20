@@ -120,3 +120,30 @@ class DBhandler:
         except Exception as e:
             print(f"Purchase Error: {e}")
             return False
+        
+    # 리뷰 등록 함수
+    def reg_review(self, item_name, data, img_path, writer_id):
+        review_key = f"{item_name}_{writer_id}"
+
+        review_info ={
+            "title": data.get('reviewTitle'),
+            "rate": data.get('rating'),
+            "content": data.get('reviewContent'),
+            "img_path": img_path,
+            "item_name": item_name,
+            "writer_id": writer_id
+        }
+
+        self.db.child("review").child(review_key).set(review_info)
+        return True
+    
+    # 전체 리뷰 조회 함수
+    def get_reviews(self):
+        reviews = self.db.child("review").get().val()
+        return reviews
+    
+    # 특정 리뷰 상세 조회 함수
+    def get_review_byname_and_writer(self, item_name, writer_id):
+        review_key = f"{item_name}_{writer_id}"
+        review_data = self.db.child("review").child(review_key).get().val()
+        return review_data
