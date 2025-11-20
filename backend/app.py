@@ -12,6 +12,8 @@ app = Flask(__name__,
            )
 app.config["SECRET_KEY"] = "EwhaMarket_SecretKey" # 세션 관리를 위한 시크릿 키 (필수)
 
+app.add_url_rule('/uploads/<path:filename>', endpoint='uploads', view_func=app.send_static_file)
+
 DB = DBhandler()
 
 @app.route("/")
@@ -102,14 +104,43 @@ def review_detail():
     else:
         return "리뷰를 찾을 수 없습니다.", 404
 
-@app.route('/review.html')
-def review_page():
-    data = DB.get_reviews() 
-    
-    if not data:
-        data = {}
 
-    return render_template('review.html', datas=data.items())
+
+@app.route("/review")
+def view_review():
+    page = request.args.get("page",0,type=int)
+    per_page=8
+    per_row=2
+
+    data=DB.get_reviews()
+    if not data:
+        data={}
+
+    item_counts=len(data)
+ 
+    data_list=list(data.items()) #딕셔너리->리스트변환
+    page_count=int((item_counts/per_page)+1) #전체페이지수 계산
+
+    
+    start_idx=per_page*page
+    end_idx=per_page*(page+1) #현재 페이지에 뿌릴 데이터
+
+    datas = dict(data_list[start_idx:end_idx])
+
+    row1=dict(list(datas.items())[:2])
+    row2=dict(list(datas.items())[2:8]) #row1 row2분리
+
+    return render_template(
+        "review.html",
+        datas=datas.items(),
+        row0=row1.items(),
+        row1=row2.items(),
+        page=page,
+        page_count=page_count,
+        total=item_counts
+    )
+
+
 
 @app.route('/mypage.html')
 def mypage():

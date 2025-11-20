@@ -147,3 +147,7 @@ class DBhandler:
         review_key = f"{item_name}_{writer_id}"
         review_data = self.db.child("review").child(review_key).get().val()
         return review_data
+    
+    def get_reviews(self):
+        reviews = self.db.child("review").get().val()
+        return reviews
