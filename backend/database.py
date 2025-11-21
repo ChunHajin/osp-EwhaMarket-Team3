@@ -144,12 +144,10 @@ class DBhandler:
         return reviews
     
     # 특정 리뷰 상세 조회 함수
-    def get_review_byname_and_writer(self, item_name, writer_id):
-        review_key = f"{item_name}_{writer_id}"
+    def get_review_by_key(self, review_key):
+        """
+        리뷰 키(review_key)로 직접 조회. review_key는 reg_review에서 생성한 키와 동일한 형식.
+        """
         review_data = self.db.child("review").child(review_key).get().val()
         return review_data
-<<<<<<< HEAD
-    
-=======
->>>>>>> ab5414c (feat: 리뷰 상세 연결)
     

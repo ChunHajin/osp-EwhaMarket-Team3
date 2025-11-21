@@ -91,21 +91,14 @@ def submit_review_post():
         print(f"리뷰 등록 중 오류 발생: {e}")
         return f"<h3>❌ 리뷰 등록 오류 발생: {e}</h3>", 500
 
-@app.route('/review-detail.html')
-def review_detail():
-    item_name = request.args.get('item_name')
-    writer_id = request.args.get('writer_id')
-
-    if not item_name or not writer_id:
-        # 필수 정보 누락 시
-        return redirect(url_for('review_page'))
-    
-    data = DB.get_review_byname_and_writer(item_name, writer_id)
-    
+@app.route('/review-detail/<review_key>')
+def review_detail_by_key(review_key):
+    # path에 들어온 키(review_key)로 DB에서 직접 조회.
+    # review_key는 reg_review에서 생성한 키.
+    data = DB.get_review_by_key(review_key)
     if data:
-        return render_template('review-detail.html', 
-                                data=data, 
-                                item_name=item_name)
+        item_name = data.get('item_name') if isinstance(data, dict) else None
+        return render_template('review-detail.html', data=data, item_name=item_name)
     else:
         return "리뷰를 찾을 수 없습니다.", 404
 
