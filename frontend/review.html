@@ -22,20 +22,20 @@
       <div class="review-grid">
         <!-- 리뷰 카드  -->
         {% for key, value in datas %}
-      <div class="review-card" onclick="location.href='/review-detail/{{ key }}'" style="cursor:pointer;">
 
+      <div class="review-card" onclick="location.href='/review-detail/{{ key }}'" style="cursor:pointer;">
           <div class="review-img-wrap">
-             {% if value.img_path %}
+             {% if value.img_path and value.img_path != "" %}
                <img src="/{{ value.img_path }}" class="review-img" alt="리뷰 이미지">
              {% else %}
-               <img src="/uploads/default_review.png" class="review-ing" alt="기본 이미지">
+               <img src="{{ url_for('static', filename='uploads/default_review.png') }}" class="review-img" alt="기본 이미지">
              {% endif %}
           </div>
           <div class="review-user">
             <div class="user-avatar"></div>
             <div class="user-meta">
-              <p class="username">{{ value.username if value.username else '사용자' }}</p>
-              <p class="date">{{ value.date if value.date else '작성일 없음' }}</p>
+              <p class="username">{{ value.writer_id | default('') }}</p>
+              <p class="date">{{ format_time_ago(value.created_at) if value.created_at else '' }}</p>
             </div>
           </div>
           <div class="stars">
@@ -50,7 +50,7 @@
           </div>
           <p class="rating">{{ value.rate if value.rate else '5.0' }}</p>
           <p class="content">{{ value.content }}</p>
-          <p class="product-name">{{ value.product_name }}</p>
+          <p class="product-name">{{ value.item_name }}</p>
         </div>
         {% endfor %}
 

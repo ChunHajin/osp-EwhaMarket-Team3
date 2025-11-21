@@ -122,7 +122,7 @@ class DBhandler:
             return False
         
     # 리뷰 등록 함수
-    def reg_review(self, item_name, data, img_path, writer_id):
+    def reg_review(self, item_name, data, img_path, writer_id, created_at):
         review_key = f"{item_name}_{writer_id}"
 
         review_info ={
@@ -131,11 +131,12 @@ class DBhandler:
             "content": data.get('reviewContent'),
             "img_path": img_path,
             "item_name": item_name,
-            "writer_id": writer_id
+            "writer_id": writer_id,
+            "created_at": created_at
         }
 
         self.db.child("review").child(review_key).set(review_info)
-        return True
+        return review_key
     
     # 전체 리뷰 조회 함수
     def get_reviews(self):
@@ -147,5 +148,8 @@ class DBhandler:
         review_key = f"{item_name}_{writer_id}"
         review_data = self.db.child("review").child(review_key).get().val()
         return review_data
+<<<<<<< HEAD
     
+=======
+>>>>>>> ab5414c (feat: 리뷰 상세 연결)
     

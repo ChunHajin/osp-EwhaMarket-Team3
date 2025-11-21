@@ -1,5 +1,6 @@
 from flask import Flask, request, redirect, session, jsonify, render_template, url_for
 from database import DBhandler
+from datetime import datetime, timedelta
 import hashlib
 import json
 import os
@@ -62,17 +63,21 @@ def review_write():
 def submit_review_post():
     writer_id = session.get('id')
     if not writer_id:
-        return jsonify({"success": False, "message": "로그인이 필요합니다."}), 401
+        return redirect(url_for('login_page'))
     
     try:
         data = request.form
         item_name = data.get("item_name")
 
+        # 작성 시간 생성
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
         image_file = request.files.get("review-photos")
         img_path = ""
         if image_file and image_file.filename:
             save_dir = os.path.join(os.getcwd(), "frontend", "uploads")
-            os.makedirs(save_dir, exist_ok=True)
+            if not os.path.exists(save_dir):
+                    os.makedirs(save_dir, exist_ok=True)    
 
             filename_key = f"{item_name}_{writer_id}_{image_file.filename}"
             img_path = f"uploads/{filename_key}"
@@ -315,6 +320,48 @@ def purchase_item_api():
         return jsonify({"success": True})
     else:
         return jsonify({"success": False, "message": "구매 처리에 실패했습니다."}), 500
+
+# 시간을 상대적 포맷(n초 전 ~ n년 전)으로 변환
+def format_time_ago(timestamp_str):
+    """
+    'YYYY-MM-DD HH:MM:SS' 형식의 타임스탬프를 'n초 전', 'n분 전', 'n시간 전', 'n일 전', 'n달 전', 'n년 전'으로 변환
+    """
+    # Firebase DB에 저장된 형식에 따라 strptime의 형식을 변경해야 할 수 있음
+    TIME_FORMAT = "%Y-%m-%d %H:%M:%S" 
+    try:
+        posted_time = datetime.strptime(timestamp_str, TIME_FORMAT)
+    except (ValueError, TypeError):
+        return timestamp_str
+    
+    now = datetime.now()
+    delta = now - posted_time
+    
+    # 초 단위 차이
+    seconds = delta.total_seconds()
+    days = delta.days
+
+    if seconds < 60:
+        return f"{int(seconds)}초 전"
+    elif seconds < 3600: # 1시간 미만
+        minutes = int(seconds / 60)
+        return f"{minutes}분 전"
+    elif seconds < 86400: # 24시간 미만
+        hours = int(seconds / 3600)
+        return f"{hours}시간 전"
+    elif days < 30: # 30일 미만 (대략 1달 미만)
+        return f"{days}일 전"
+    elif days < 365: # 365일 미만 (대략 1년 미만)
+        months = int(days / 30)
+        return f"{months}달 전"
+    else: # 365일 이상 (1년 이상)
+        years = int(days / 365)
+        return f"{years}년 전"
+
+
+@app.context_processor
+def inject_user_and_time(): 
+    return dict(user_id=session.get('id'),
+                format_time_ago=format_time_ago)
 
 if __name__ == "__main__":
     # 두 가지 방법으로 실행 가능
