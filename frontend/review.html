@@ -22,7 +22,7 @@
       <div class="review-grid">
         <!-- 리뷰 카드  -->
         {% for key, value in datas %}
-      <div class="review-card" onclick="location.href='/view_review_detail/{{ key }}'" style="cursor:pointer;">
+      <div class="review-card" onclick="location.href='/review-detail/{{ key }}'" style="cursor:pointer;">
 
           <div class="review-img-wrap">
              {% if value.img_path %}
