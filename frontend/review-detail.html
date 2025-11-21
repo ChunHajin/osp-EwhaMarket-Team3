@@ -32,6 +32,7 @@
                             {% set rating_value = data.rate | default(0.0) | float %}
                             {% set full_stars = rating_value | int %}
                             {% set has_half_star = (rating_value - full_stars) >= 0.5 %}
+                            {% set total_rendered_stars = full_stars + (1 if has_half_star else 0) %}
 
                             <div class="star-rating" data-rating="{{ rating_value | round(1) }}">
                                 {% for i in range(full_stars) %}
@@ -40,20 +41,21 @@
 
                                 {% if has_half_star %}
                                 <i class="fas fa-star-half-alt star"></i>
-                                {% set full_stars = full_stars + 1 %} {% endif %}
+                                {% endif %}
 
-                                {% for i in range(5 - full_stars) %}
+                                {% for i in range(5 - total_rendered_stars) %}
                                 <i class="far fa-star star"></i>
                                 {% endfor %}
                             </div>
                             <span class="rating-number">{{ rating_value | round(1) }}</span>
                         </div>
-                    <div class="review-text-content"></div>
-                        <p class="review-text">
-                            {{ data.content | replace('\n', '<br>') }}
-                        </p>
+                        <div class="review-text-content"></div>
+                            <p class="review-text">
+                                {{ data.content | default('') | replace('\n', '<br>') }}
+                            </p>
 
-                        <span class="review-time">{{ format_time_ago(data.created_at) if data.created_at }}</span>
+                            <span class="review-time">{{ format_time_ago(data.created_at) if data.created_at }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
