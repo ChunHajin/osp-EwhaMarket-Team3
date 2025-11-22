@@ -13,48 +13,42 @@
             <h1 class="page-title">리뷰 상세</h1>
 
             <div class="review-header">
-                <h2 class="review-title">{{ data.title if data.title else '제목 없음' }}</h2>
-                <span class="review-author">작성자 {{ data.writer_id if data.writer_id else '작성자 정보 없음' }}</span>
+                <h2 class="review-title">{{ review_data.title if review_data.title else '제목 없음' }}</h2>
+                <span class="review-author">작성자 {{ review_data.writer_id if review_data.writer_id else '작성자 정보 없음' }}</span>
             </div>
 
             <div class="card review-card">
                 <div class="review-content-body">
                     <div class="review-photo-wrapper">
-                        {% if data.img_path and data.img_path != "" %}
-                        <img src="/{{ data.img_path }}" alt="리뷰 첨부 사진" class="review-photo">
+                        {% if review_data.img_path and review_data.img_path != "" %}
+                        <img src="{{ url_for('static', filename=review_data.img_path) }}" alt="{{ review_data.item_name }} 리뷰 사진" class="review-photo">
                         {% else %}
-                        <img src="{{ url_for('static', filename='uploads/default_review.png') }}" alt="사진 없음" class="review-photo">
+                        <img src="{{ url_for('static', filename='uploads/default_review.png') }}" alt="기본 이미지" class="review-photo">
                         {% endif %}
                     </div>
                     
                     <div class="review-text-wrapper">
                         <div class="review-rating-group">
-                            {% set rating_value = data.rate | default(0.0) | float %}
-                            {% set full_stars = rating_value | int %}
-                            {% set has_half_star = (rating_value - full_stars) >= 0.5 %}
-                            {% set total_rendered_stars = full_stars + (1 if has_half_star else 0) %}
+                            {% set rating_value = review_data.rate | default(0.0) | float %}
+                            {% set filled_stars_count = rating_value | int %}
 
                             <div class="star-rating" data-rating="{{ rating_value | round(1) }}">
-                                {% for i in range(full_stars) %}
+                                {% for i in range(filled_stars_count) %}
                                 <i class="fas fa-star star"></i>
                                 {% endfor %}
 
-                                {% if has_half_star %}
-                                <i class="fas fa-star-half-alt star"></i>
-                                {% endif %}
-
-                                {% for i in range(5 - total_rendered_stars) %}
-                                <i class="far fa-star star"></i>
+                                {% for i in range(5 - filled_stars_count) %}
+                                <i class="far fa-star star"></i>
                                 {% endfor %}
                             </div>
                             <span class="rating-number">{{ rating_value | round(1) }}</span>
                         </div>
                         <div class="review-text-content"></div>
                             <p class="review-text">
-                                {{ data.content | default('') | replace('\n', '<br>') }}
+                                {{ review_data.content | nl2br }}
                             </p>
 
-                            <span class="review-time">{{ format_time_ago(data.created_at) if data.created_at }}</span>
+                            <span class="review-time">{{ format_time_ago(review_data.created_at) if review_data.created_at }}</span>
                         </div>
                     </div>
                 </div>

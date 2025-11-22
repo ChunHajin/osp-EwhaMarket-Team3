@@ -1,6 +1,7 @@
 from flask import Flask, request, redirect, session, jsonify, render_template, url_for
 from database import DBhandler
 from datetime import datetime, timedelta
+from markupsafe import Markup
 import hashlib
 import json
 import os
@@ -13,7 +14,7 @@ app = Flask(__name__,
            )
 app.config["SECRET_KEY"] = "EwhaMarket_SecretKey" # 세션 관리를 위한 시크릿 키 (필수)
 
-app.add_url_rule('/uploads/<path:filename>', endpoint='uploads', view_func=app.send_static_file)
+#app.add_url_rule('/uploads/<path:filename>', endpoint='uploads', view_func=app.send_static_file)
 
 DB = DBhandler()
 
@@ -74,6 +75,7 @@ def submit_review_post():
 
         image_file = request.files.get("review-photos")
         img_path = ""
+
         if image_file and image_file.filename:
             save_dir = os.path.join(os.getcwd(), "frontend", "uploads")
             if not os.path.exists(save_dir):
@@ -83,9 +85,9 @@ def submit_review_post():
             img_path = f"uploads/{filename_key}"
             image_file.save(os.path.join(save_dir, filename_key))
 
-            DB.reg_review(item_name, data, img_path, writer_id)
+        DB.reg_review(item_name, data, img_path, writer_id, current_time)
 
-            return redirect(url_for('review_page'))
+        return redirect(url_for('view_review'))
         
     except Exception as e:
         print(f"리뷰 등록 중 오류 발생: {e}")
@@ -95,10 +97,9 @@ def submit_review_post():
 def review_detail_by_key(review_key):
     # path에 들어온 키(review_key)로 DB에서 직접 조회.
     # review_key는 reg_review에서 생성한 키.
-    data = DB.get_review_by_key(review_key)
-    if data:
-        item_name = data.get('item_name') if isinstance(data, dict) else None
-        return render_template('review-detail.html', data=data, item_name=item_name)
+    review_data = DB.get_review_by_key(review_key)
+    if review_data:
+        return render_template('review-detail.html', review_data=review_data, review_key=review_key)
     else:
         return "리뷰를 찾을 수 없습니다.", 404
 
@@ -400,6 +401,16 @@ def format_time_ago(timestamp_str):
 def inject_user_and_time(): 
     return dict(user_id=session.get('id'),
                 format_time_ago=format_time_ago)
+
+# -------------------- 여기부터 Jinja2 필터 추가 --------------------
+@app.template_filter('nl2br')
+def nl2br_filter(s):
+    """줄바꿈 문자(\n)를 HTML <br> 태그로 변환하는 Jinja2 필터"""
+    if not isinstance(s, str):
+        s = str(s)
+    
+    # \n을 <br> 태그로 치환하고 Markup 객체로 반환하여 HTML로 인식시킵니다.
+    return Markup(s.replace('\n', '<br>'))
 
 if __name__ == "__main__":
     # 두 가지 방법으로 실행 가능

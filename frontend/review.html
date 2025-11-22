@@ -26,7 +26,7 @@
       <div class="review-card" onclick="location.href='/review-detail/{{ key }}'" style="cursor:pointer;">
           <div class="review-img-wrap">
              {% if value.img_path and value.img_path != "" %}
-               <img src="/{{ value.img_path }}" class="review-img" alt="리뷰 이미지">
+               <img src="{{ url_for('static', filename=value.img_path) }}" class="review-img" alt="리뷰 이미지">
              {% else %}
                <img src="{{ url_for('static', filename='uploads/default_review.png') }}" class="review-img" alt="기본 이미지">
              {% endif %}

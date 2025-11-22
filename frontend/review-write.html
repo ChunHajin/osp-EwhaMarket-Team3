@@ -85,13 +85,12 @@
         document.addEventListener('DOMContentLoaded', () => {
             //파일 미리보기 기능
             const fileInput = document.getElementById('file-upload');
-            const previewImage = document.querySelector('review-preview');
+            const previewImage = document.getElementById('review-preview');
             const photoDrop = document.querySelector('.photo-drop');
-            const fileNameDisplay = document.getElementById('file-name-display');
 
-            if (fileInput && fileNameDisplay && photoDrop) {
+            if (fileInput && previewImage && photoDrop) {
                 fileInput.addEventListener('change', (event) => {
-                    const files = event.target.files[0];
+                    const file = event.target.files[0];
 
                     if (file) {
                         const reader = new FileReader();
@@ -99,10 +98,14 @@
                         reader.onload = function(e) {
                             previewImage.src = e.target.result;
                             previewImage.alt = file.name;
-                            fileNameDisplay.textContent = file.name;
+                            
                             previewImage.classList.remove('hidden-preview');
+                            plusIcon.style.display = 'none';
+                            plusIcon.style.display = 'block';
                             photoDrop.classList.add('file-selected');
                         };
+                        reader.readAsDataURL(file);
+
                     } else {
                         previewImage.src = '#';
                         previewImage.alt = '리뷰 사진 미리보기'; // alt 속성 초기화
@@ -110,6 +113,8 @@
                         photoDrop.classList.remove('file-selected');
                     }
                 });
+            } else {
+                console.error("File upload elements not found.");
             }
 
             // 별점 기능 구현 (JavaScript)
