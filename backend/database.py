@@ -121,6 +121,36 @@ class DBhandler:
             print(f"Purchase Error: {e}")
             return False
         
+    # 리뷰 등록 함수
+    def reg_review(self, item_name, data, img_path, writer_id, created_at):
+        review_key = f"{item_name}_{writer_id}"
+
+        review_info ={
+            "title": data.get('reviewTitle'),
+            "rate": data.get('rating'),
+            "content": data.get('reviewContent'),
+            "img_path": img_path,
+            "item_name": item_name,
+            "writer_id": writer_id,
+            "created_at": created_at
+        }
+
+        self.db.child("review").child(review_key).set(review_info)
+        return review_key
+    
+    # 전체 리뷰 조회 함수
+    def get_reviews(self):
+        reviews = self.db.child("review").get().val()
+        return reviews
+    
+    # 특정 리뷰 상세 조회 함수
+    def get_review_by_key(self, review_key):
+        """
+        리뷰 키(review_key)로 직접 조회. review_key는 reg_review에서 생성한 키와 동일한 형식.
+        """
+        review_data = self.db.child("review").child(review_key).get().val()
+        return review_data
+    
      # -------------------- 좋아요 기능 추가 --------------------
 
     def get_like_status(self, item_name, user_id):

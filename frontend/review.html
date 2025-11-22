@@ -10,7 +10,7 @@
   <main class="main-content">
     <div class="card review-page">
       <h2 class="page-title">상품 후기 / 전체 조회</h2>
-      <p class="review-count">총 <strong>34개</strong> 리뷰</p>
+      <p class="review-count">총 <strong>{{total}}개</strong> 리뷰</p>
 
       <!-- 필터 버튼 -->
       <div class="filter-buttons">
@@ -20,73 +20,53 @@
 
       <!-- 리뷰 카드 목록 -->
       <div class="review-grid">
-        <!-- 리뷰 카드 1 -->
-        <div class="review-card">
-          <div class="review-user">
-            <div class="user-avatar"></div>
-            <div class="user-meta">
-              <p class="username">사용자이름</p>
-              <p class="date">2일 전</p>
-            </div>
-          </div>
-          <div class="stars">★★★★★</div>
-          <p class="rating">5.0</p>
-          <p class="content">상품이 깨끗하고 포장도 잘 돼서 왔어요. 가격도 착해서 저렴하게 구매했습니다.</p>
-          <p class="product-name">아이패드 에어 4세대</p>
-        </div>
+        <!-- 리뷰 카드  -->
+        {% for key, value in datas %}
 
-        <!-- 리뷰 카드 2 -->
-        <div class="review-card">
+      <div class="review-card" onclick="location.href='/review-detail/{{ key }}'" style="cursor:pointer;">
+          <div class="review-img-wrap">
+             {% if value.img_path and value.img_path != "" %}
+               <img src="/{{ value.img_path }}" class="review-img" alt="리뷰 이미지">
+             {% else %}
+               <img src="{{ url_for('static', filename='uploads/default_review.png') }}" class="review-img" alt="기본 이미지">
+             {% endif %}
+          </div>
           <div class="review-user">
             <div class="user-avatar"></div>
             <div class="user-meta">
-              <p class="username">사용자이름</p>
-              <p class="date">2일 전</p>
+              <p class="username">{{ value.writer_id | default('') }}</p>
+              <p class="date">{{ format_time_ago(value.created_at) if value.created_at else '' }}</p>
             </div>
           </div>
-          <div class="stars">★★★★★</div>
-          <p class="rating">5.0</p>
-          <p class="content">옷이 너무 예뻐요</p>
-          <p class="product-name">원피스</p>
-        </div>
+          <div class="stars">
+             {% set rating = (value.rate | default(0) | float) | int %}
 
-        <!-- 리뷰 카드 3 -->
-        <div class="review-card">
-          <div class="review-user">
-            <div class="user-avatar"></div>
-            <div class="user-meta">
-              <p class="username">사용자이름</p>
-              <p class="date">2일 전</p>
-            </div>
+            {% for i in range(rating) %}
+              ★
+            {% endfor %}
+            {% for i in range(5 - rating) %}
+              ☆
+            {% endfor %}
           </div>
-          <div class="stars">★★★★★</div>
-          <p class="rating">5.0</p>
-          <p class="content">작동도 잘 되고 효과도 좋은 것 같아요. 직거래할 때도 친절하게 해주셔서 너무 좋았어요.</p>
-          <p class="product-name">공기청정기</p>
+          <p class="rating">{{ value.rate if value.rate else '5.0' }}</p>
+          <p class="content">{{ value.content }}</p>
+          <p class="product-name">{{ value.item_name }}</p>
         </div>
+        {% endfor %}
 
-        <!-- 리뷰 카드 4 -->
-        <div class="review-card">
-          <div class="review-user">
-            <div class="user-avatar"></div>
-            <div class="user-meta">
-              <p class="username">사용자이름</p>
-              <p class="date">2일 전</p>
-            </div>
-          </div>
-          <div class="stars">★★★★★</div>
-          <p class="rating">5.0</p>
-          <p class="content">새상품인데도 싸게 샀어요. 발색도 잘 돼요.</p>
-          <p class="product-name">맥 립스틱</p>
-        </div>
+        
       </div>
 
       <!-- 페이지네이션 -->
       <div class="pagination">
         <ul class="pagination-list">
-          <li><a href="#" class="active">1</a></li>
-          <li><a href="#">2</a></li>
-          <li><a href="#">3</a></li>
+          {% for i in range(page_count) %}
+            {% if i == page %}
+              <li><a href="{{ url_for('view_review',page=i) }}" class="active">{{ i+1 }}</a></li>
+            {% else %}
+              <li><a href="{{ url_for('view_review',page=i) }}">{{ i+1 }}</a></li>
+            {% endif %}
+          {% endfor %}
         </ul>
       </div>
     </div>

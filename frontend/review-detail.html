@@ -3,7 +3,7 @@
 {% block title %}리뷰 상세 | 이화마켓{% endblock %}
 
 {% block styles %}
-    <link rel="stylesheet" href="css/review-detail.css">
+    <link rel="stylesheet" href="/css/review-detail.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 {% endblock %}
 
@@ -13,33 +13,49 @@
             <h1 class="page-title">리뷰 상세</h1>
 
             <div class="review-header">
-                <h2 class="review-title">아이패드 에어 4세대 거래 후기</h2>
-                <span class="review-author">작성자 ewhosp</span>
+                <h2 class="review-title">{{ data.title if data.title else '제목 없음' }}</h2>
+                <span class="review-author">작성자 {{ data.writer_id if data.writer_id else '작성자 정보 없음' }}</span>
             </div>
 
             <div class="card review-card">
                 <div class="review-content-body">
                     <div class="review-photo-wrapper">
-                        <img src="ipad_air_4th_gen_review.jpg" alt="리뷰 첨부 사진" class="review-photo">
+                        {% if data.img_path and data.img_path != "" %}
+                        <img src="/{{ data.img_path }}" alt="리뷰 첨부 사진" class="review-photo">
+                        {% else %}
+                        <img src="{{ url_for('static', filename='uploads/default_review.png') }}" alt="사진 없음" class="review-photo">
+                        {% endif %}
                     </div>
                     
                     <div class="review-text-wrapper">
                         <div class="review-rating-group">
-                            <div class="star-rating" data-rating="4">
+                            {% set rating_value = data.rate | default(0.0) | float %}
+                            {% set full_stars = rating_value | int %}
+                            {% set has_half_star = (rating_value - full_stars) >= 0.5 %}
+                            {% set total_rendered_stars = full_stars + (1 if has_half_star else 0) %}
+
+                            <div class="star-rating" data-rating="{{ rating_value | round(1) }}">
+                                {% for i in range(full_stars) %}
                                 <i class="fas fa-star star"></i>
-                                <i class="fas fa-star star"></i>
-                                <i class="fas fa-star star"></i>
-                                <i class="fas fa-star star"></i>
-                                <i class="far fa-star star"></i> </div>
-                            <span class="rating-number">4.0</span>
+                                {% endfor %}
+
+                                {% if has_half_star %}
+                                <i class="fas fa-star-half-alt star"></i>
+                                {% endif %}
+
+                                {% for i in range(5 - total_rendered_stars) %}
+                                <i class="far fa-star star"></i>
+                                {% endfor %}
+                            </div>
+                            <span class="rating-number">{{ rating_value | round(1) }}</span>
                         </div>
+                        <div class="review-text-content"></div>
+                            <p class="review-text">
+                                {{ data.content | default('') | replace('\n', '<br>') }}
+                            </p>
 
-                        <p class="review-text">
-                            상품이 깨끗하고 포장도 잘돼서 왔어요<br>
-                            가격도 깎아주셔서 저렴하게 구매했습니다
-                        </p>
-
-                        <span class="review-time">2분 전</span>
+                            <span class="review-time">{{ format_time_ago(data.created_at) if data.created_at }}</span>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -102,7 +102,9 @@
                         <p class="product-price">{{ item.price }}원</p>
                     </div>
                     <div class="manage-buttons">
-                        <a href="/review-write.html" class="btn-text-small btn-green-text">리뷰 작성</a>
+
+                        <a href="{{ url_for('review_write') }}?item_name={{ item.title }}" class="btn-text-small btn-green-text">리뷰 작성</a>
+
                     </div>
                 </div>
             </div>

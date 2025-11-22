@@ -1,5 +1,6 @@
 from flask import Flask, request, redirect, session, jsonify, render_template, url_for
 from database import DBhandler
+from datetime import datetime, timedelta
 import hashlib
 import json
 import os
@@ -11,6 +12,8 @@ app = Flask(__name__,
             static_url_path=""
            )
 app.config["SECRET_KEY"] = "EwhaMarket_SecretKey" # 세션 관리를 위한 시크릿 키 (필수)
+
+app.add_url_rule('/uploads/<path:filename>', endpoint='uploads', view_func=app.send_static_file)
 
 DB = DBhandler()
 
@@ -38,15 +41,104 @@ def product_wishlist():
 
 @app.route('/review-write.html')
 def review_write():
-    return render_template('review-write.html')
+    item_name = request.args.get('item_name')
+    user_id = session.get('id')
 
-@app.route('/review-detail.html')
-def review_detail():
-    return render_template('review-detail.html')
+    if not user_id:
+        return redirect(url_for('login_page'))
+    
 
-@app.route('/review.html')
-def review_page():
-    return render_template('review.html')
+    product_data = None
+
+    # 상품 이름으로 DB에서 상품 정보 조회
+    if item_name:
+        product_data = DB.get_item_byname(item_name)
+    
+    return render_template('review-write.html',
+                           product=product_data,
+                           product_key=item_name,
+                           writer_id=user_id)
+
+@app.route("/submit_review_post", methods=['POST'])
+def submit_review_post():
+    writer_id = session.get('id')
+    if not writer_id:
+        return redirect(url_for('login_page'))
+    
+    try:
+        data = request.form
+        item_name = data.get("item_name")
+
+        # 작성 시간 생성
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        image_file = request.files.get("review-photos")
+        img_path = ""
+        if image_file and image_file.filename:
+            save_dir = os.path.join(os.getcwd(), "frontend", "uploads")
+            if not os.path.exists(save_dir):
+                    os.makedirs(save_dir, exist_ok=True)    
+
+            filename_key = f"{item_name}_{writer_id}_{image_file.filename}"
+            img_path = f"uploads/{filename_key}"
+            image_file.save(os.path.join(save_dir, filename_key))
+
+            DB.reg_review(item_name, data, img_path, writer_id)
+
+            return redirect(url_for('review_page'))
+        
+    except Exception as e:
+        print(f"리뷰 등록 중 오류 발생: {e}")
+        return f"<h3>❌ 리뷰 등록 오류 발생: {e}</h3>", 500
+
+@app.route('/review-detail/<review_key>')
+def review_detail_by_key(review_key):
+    # path에 들어온 키(review_key)로 DB에서 직접 조회.
+    # review_key는 reg_review에서 생성한 키.
+    data = DB.get_review_by_key(review_key)
+    if data:
+        item_name = data.get('item_name') if isinstance(data, dict) else None
+        return render_template('review-detail.html', data=data, item_name=item_name)
+    else:
+        return "리뷰를 찾을 수 없습니다.", 404
+
+
+
+@app.route("/review")
+def view_review():
+    page = request.args.get("page",0,type=int)
+    per_page=8
+    per_row=2
+
+    data=DB.get_reviews()
+    if not data:
+        data={}
+
+    item_counts=len(data)
+ 
+    data_list=list(data.items()) #딕셔너리->리스트변환
+    page_count=int((item_counts/per_page)+1) #전체페이지수 계산
+
+    
+    start_idx=per_page*page
+    end_idx=per_page*(page+1) #현재 페이지에 뿌릴 데이터
+
+    datas = dict(data_list[start_idx:end_idx])
+
+    row1=dict(list(datas.items())[:2])
+    row2=dict(list(datas.items())[2:8]) #row1 row2분리
+
+    return render_template(
+        "review.html",
+        datas=datas.items(),
+        row0=row1.items(),
+        row1=row2.items(),
+        page=page,
+        page_count=page_count,
+        total=item_counts
+    )
+
+
 
 @app.route('/mypage.html')
 def mypage():
@@ -266,6 +358,48 @@ def toggle_like_api():
     return jsonify({"success": True, "liked": liked, "message": msg})
 
 # ----------------------------------------------------------------------
+
+# 시간을 상대적 포맷(n초 전 ~ n년 전)으로 변환
+def format_time_ago(timestamp_str):
+    """
+    'YYYY-MM-DD HH:MM:SS' 형식의 타임스탬프를 'n초 전', 'n분 전', 'n시간 전', 'n일 전', 'n달 전', 'n년 전'으로 변환
+    """
+    # Firebase DB에 저장된 형식에 따라 strptime의 형식을 변경해야 할 수 있음
+    TIME_FORMAT = "%Y-%m-%d %H:%M:%S" 
+    try:
+        posted_time = datetime.strptime(timestamp_str, TIME_FORMAT)
+    except (ValueError, TypeError):
+        return timestamp_str
+    
+    now = datetime.now()
+    delta = now - posted_time
+    
+    # 초 단위 차이
+    seconds = delta.total_seconds()
+    days = delta.days
+
+    if seconds < 60:
+        return f"{int(seconds)}초 전"
+    elif seconds < 3600: # 1시간 미만
+        minutes = int(seconds / 60)
+        return f"{minutes}분 전"
+    elif seconds < 86400: # 24시간 미만
+        hours = int(seconds / 3600)
+        return f"{hours}시간 전"
+    elif days < 30: # 30일 미만 (대략 1달 미만)
+        return f"{days}일 전"
+    elif days < 365: # 365일 미만 (대략 1년 미만)
+        months = int(days / 30)
+        return f"{months}달 전"
+    else: # 365일 이상 (1년 이상)
+        years = int(days / 365)
+        return f"{years}년 전"
+
+
+@app.context_processor
+def inject_user_and_time(): 
+    return dict(user_id=session.get('id'),
+                format_time_ago=format_time_ago)
 
 if __name__ == "__main__":
     # 두 가지 방법으로 실행 가능
