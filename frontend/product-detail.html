@@ -45,7 +45,14 @@
 
           <div class="button-group">
             <button type="button" class="btn btn-green btn-full btn-large" onclick="requestPurchase('{{ name }}')">구매하기</button>
-            <button class="btn-icon-like">
+        
+            </button>
+            <button
+              type="button"
+              class="btn-icon-like"
+              id="likeButton"
+              data-item-name="{{ name }}"
+            >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <use href="#icon-heart"></use>
               </svg>
@@ -85,5 +92,76 @@ async function requestPurchase(itemName) {
         alert("서버 통신 중 오류가 발생했습니다.");
     }
 }
+/* ------------------- 여기부터 좋아요 기능 추가 ------------------- */
+
+const likeButton = document.getElementById('likeButton');
+const USER_ID = "{{ user_id or '' }}";  // 로그인 정보 (inject_user 사용)
+
+function updateHeart(liked) {
+    if (!likeButton) return;
+    if (liked) {
+        likeButton.classList.add("liked");
+    } else {
+        likeButton.classList.remove("liked");
+    }
+}
+
+async function fetchLikeStatus(itemName) {
+    try {
+        const res = await fetch(`/api/like_status?item_name=${encodeURIComponent(itemName)}`);
+        const data = await res.json();
+        if (data.success) {
+            updateHeart(data.liked);
+        }
+    } catch (e) {
+        console.error("like_status error:", e);
+    }
+}
+
+async function toggleLike(itemName) {
+    if (!USER_ID) {
+        alert("로그인 후 이용 가능합니다.");
+        window.location.href = "/login.html";
+        return;
+    }
+
+    try {
+        const res = await fetch("/api/toggle_like", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ item_name: itemName })
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+            updateHeart(data.liked);
+            alert(data.message);  
+        } else {
+            alert(data.message || "좋아요 처리 중 오류가 발생했습니다.");
+        }
+    } catch (e) {
+        console.error("toggle_like error:", e);
+        alert("서버 통신 중 오류가 발생했습니다.");
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    if (!likeButton) return;
+
+    const itemName = likeButton.dataset.itemName;
+
+    // 페이지 로딩 시 좋아요 상태 조회
+    if (itemName) {
+        fetchLikeStatus(itemName);
+    }
+
+    // 누르면 좋아요 토글
+    likeButton.addEventListener("click", () => {
+        if (!itemName) return;
+        toggleLike(itemName);
+    });
+});
+
 </script>
 {% endblock %}
