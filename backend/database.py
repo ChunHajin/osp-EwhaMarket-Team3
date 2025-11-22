@@ -151,3 +151,40 @@ class DBhandler:
         review_data = self.db.child("review").child(review_key).get().val()
         return review_data
     
+     # -------------------- 좋아요 기능 추가 --------------------
+
+    def get_like_status(self, item_name, user_id):
+        """
+        특정 사용자가 해당 상품에 좋아요를 눌렀는지 확인
+        likes / item_name / user_id = True 형태
+        """
+        try:
+            res = self.db.child("likes").child(item_name).child(user_id).get()
+            return bool(res.val())
+        except Exception as e:
+            print(f"get_like_status Error: {e}")
+            return False
+
+    def set_like_status(self, item_name, user_id, liked):
+        """
+        liked=True  → set(True)
+        liked=False → remove()
+        """
+        try:
+            if liked:
+                self.db.child("likes").child(item_name).child(user_id).set(True)
+            else:
+                self.db.child("likes").child(item_name).child(user_id).remove()
+            return True
+        except Exception as e:
+            print(f"set_like_status Error: {e}")
+            return False
+
+    def toggle_like(self, item_name, user_id):
+        """
+        현재 좋아요 상태를 읽고 반대로 변경한 뒤 반환
+        """
+        current = self.get_like_status(item_name, user_id)
+        new_status = not current
+        success = self.set_like_status(item_name, user_id, new_status)
+        return success, new_status

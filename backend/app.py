@@ -313,6 +313,51 @@ def purchase_item_api():
         return jsonify({"success": True})
     else:
         return jsonify({"success": False, "message": "구매 처리에 실패했습니다."}), 500
+    
+    
+# -------------------- 여기부터 좋아요 기능 API 추가 --------------------
+
+@app.route("/api/like_status")
+def like_status():
+    """
+    페이지 로딩 시 현재 사용자/상품의 좋아요 여부 조회
+    """
+    item_name = request.args.get("item_name")
+    if not item_name:
+        return jsonify({"success": False, "message": "상품명이 필요합니다."}), 400
+
+    user_id = session.get('id')
+    # 로그인 안 했으면 liked=False 로 응답
+    if not user_id:
+        return jsonify({"success": True, "liked": False, "logged_in": False})
+
+    liked = DB.get_like_status(item_name, user_id)
+    return jsonify({"success": True, "liked": liked, "logged_in": True})
+
+
+@app.route("/api/toggle_like", methods=['POST'])
+def toggle_like_api():
+    """
+    좋아요 / 안좋아요 토글
+    """
+    if 'id' not in session:
+        return jsonify({"success": False, "message": "로그인이 필요합니다."}), 401
+
+    data = request.get_json() or {}
+    item_name = data.get("item_name")
+
+    if not item_name:
+        return jsonify({"success": False, "message": "상품명이 필요합니다."}), 400
+
+    success, liked = DB.toggle_like(item_name, session['id'])
+
+    if not success:
+        return jsonify({"success": False, "message": "좋아요 처리에 실패했습니다."}), 500
+
+    msg = "좋아요 완료!" if liked else "안좋아요 완료!"
+    return jsonify({"success": True, "liked": liked, "message": msg})
+
+# ----------------------------------------------------------------------
 
 # 시간을 상대적 포맷(n초 전 ~ n년 전)으로 변환
 def format_time_ago(timestamp_str):
