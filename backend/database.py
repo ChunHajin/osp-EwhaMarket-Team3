@@ -157,6 +157,62 @@ class DBhandler:
             print(f"Purchase Error: {e}")
             return False
         
+    # 마이페이지의 상품 수정 함수
+    def update_item(self, original_key, new_data, img_path, author_id, new_key=None):
+        """
+        기존 상품 정보를 업데이트합니다.
+        :param original_key: (str) 기존 상품 이름 (Firebase Key)
+        :param new_data: (dict) 업데이트할 폼 데이터
+        :param img_path: (str) 새로 업로드된 이미지 경로 (없으면 "")
+        :param author_id: (str) 작성자 ID
+        :param new_key: (str) 변경된 상품 이름 (선택 사항)
+        :return: (bool) 업데이트 성공 여부
+        """
+        existing_data = self.db.child("item").child(original_key).get().val()
+        
+        # 1. 이미지 경로 처리: 새 이미지가 없으면 기존 이미지 경로 유지
+        final_img_path = img_path if img_path else existing_data.get("img_path", "")
+        
+        # 2. 업데이트될 데이터 구성
+        item_info = {
+            "title": new_data.get("title"),
+            "price": new_data.get("price"),
+            "region": new_data.get("region"),
+            "status": new_data.get("status"),
+            "desc": new_data.get("desc"),
+            "author": author_id, 
+            "img_path": final_img_path,
+            "category": new_data.get("category"),
+            "trade_method": new_data.get("trade_method")
+        }
+        
+        # 3. 키(상품명) 변경 여부에 따라 처리
+        if new_key and new_key != original_key:
+            # 키 변경 시: 기존 노드 삭제 후 새 노드 생성
+            self.db.child("item").child(original_key).remove()
+            self.db.child("item").child(new_key).set(item_info)
+            print(f"✅ Firebase Item Updated (Key Change: {original_key} -> {new_key})")
+        else:
+            # 키 유지 시: 기존 노드 덮어쓰기
+            self.db.child("item").child(original_key).set(item_info)
+            print(f"✅ Firebase Item Updated (Key Maintained: {original_key})")
+            
+        return True
+    
+    # 마이페이지의 상품 삭제 함수
+    def delete_item(self, item_name):
+        """
+        특정 상품 정보를 DB에서 삭제하고 연관된 좋아요 정보도 삭제
+        """
+        try:
+            self.db.child("item").child(item_name).remove()
+            self.db.child("likes").child(item_name).remove() # 연관된 좋아요 정보도 삭제
+            print(f"✅ Firebase Item {item_name} deleted.")
+            return True
+        except Exception as e:
+            print(f"Delete Item Error: {e}")
+            return False
+        
     # 리뷰 등록 함수
     def reg_review(self, item_name, data, img_path, writer_id, created_at):
         review_key = f"{item_name}_{writer_id}"

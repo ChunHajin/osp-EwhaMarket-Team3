@@ -66,8 +66,8 @@
                         <p class="product-price">{{ item.price }}원</p>
                     </div>
                     <div class="manage-buttons" onclick="event.preventDefault(); event.stopPropagation();">
-                        <button class="btn-text-small">수정</button> |
-                        <button class="btn-text-small">삭제</button>
+                        <button class="btn-text-small"onclick="window.location.href='{{ url_for('update_item_page', key=key) }}'">수정</button> |
+                        <button class="btn-text-small" onclick="deleteItem('{{ key }}')">삭제</button>
                     </div>
                 </div>
             </div>
@@ -170,6 +170,33 @@
                         console.error('Error:', error);
                         alert("서버 통신 오류가 발생했습니다.");
                     }
+                }
+            }
+
+            // 삭제 확인 및 API 호출 함수 추가
+            function deleteItem(itemKey) {
+                // 1. 확인 경고창 띄우기
+                const confirmed = confirm("정말 이 상품을 삭제하시겠습니까?");
+                
+                if (confirmed) {
+                    // 2. AJAX를 사용하여 삭제 API 호출
+                    fetch(`/api/delete_item/${itemKey}`, {
+                        method: 'POST'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("상품이 성공적으로 삭제되었습니다.");
+                            // 성공 시 페이지 새로고침하여 목록에서 제거
+                            window.location.reload(); 
+                        } else {
+                            alert(data.message || "상품 삭제에 실패했습니다.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert("서버 통신 오류가 발생했습니다.");
+                    });
                 }
             }
 

@@ -210,6 +210,83 @@ def upload_profile_img():
     except Exception as e:
         print(e)
         return jsonify({"success": False, "message": "서버 오류"}), 500
+
+@app.route('/product-update.html')
+def update_item_page():
+    if 'id' not in session:
+        return redirect(url_for('login_page'))
+    
+    user_id = session.get('id')
+    
+    item_key = request.args.get('key')
+    item_data = None
+    
+    if item_key:
+        item_data = DB.get_item_byname(item_key)
+        
+        # 상품이 없거나, 내가 등록한 상품이 아닌 경우 접근 제어
+        if not item_data or item_data.get('author') != user_id:
+            # 권한이 없거나 상품이 없으면 마이페이지로 돌려보냄
+            return redirect(url_for('mypage'))
+        
+    else:
+        # 키가 없으면 마이페이지로 돌려보냄
+        return redirect(url_for('mypage'))
+        
+    return render_template('product-update.html', 
+                           item_data=item_data, 
+                           item_key=item_key,
+                           user_id=user_id)
+
+@app.route("/submit_item_update", methods=["POST"])
+def submit_item_update():
+    author_id = session.get('id', 'unknown_user')
+    if author_id == 'unknown_user':
+        return redirect(url_for('login_page'))
+        
+    try:
+        data = request.form
+        original_key = data.get("original_key") # hidden 필드에서 가져온 기존 키
+        key_name = data.get("title", "unnamed_item") # 폼에서 입력된 새 상품명
+        
+        if not original_key:
+            return "<h3>❌ 오류 발생: 수정할 상품 키가 누락되었습니다.</h3>", 400
+        
+        image_file = request.files.get("photos")
+        img_path = ""
+        
+        if image_file and image_file.filename:
+            import time
+            save_dir = os.path.join(os.getcwd(), "frontend", "uploads")
+            os.makedirs(save_dir, exist_ok=True) 
+            
+            unique_filename = f"{key_name}_{int(time.time())}_{image_file.filename}"
+            img_path = f"uploads/{unique_filename}"
+            image_file.save(os.path.join(save_dir, unique_filename))
+        
+        DB.update_item(original_key, data, img_path, author_id, new_key=key_name)
+        
+        return f"""
+        <html><body style='font-family:sans-serif; text-align:center;'>
+        <h2>상품이 성공적으로 수정되었습니다 ✅</h2>
+        <p><b>상품명:</b> {key_name}</p>
+        <p><a href='/mypage.html'>마이페이지로 돌아가기</a></p>
+        </body></html>
+        """
+
+    except Exception as e:
+        print(f"상품 수정 중 오류 발생: {e}")
+        return f"<h3>❌ 오류 발생: {e}</h3>", 500
+    
+@app.route("/api/delete_item/<item_name>", methods=['POST'])
+def delete_item_api(item_name):
+    if 'id' not in session:
+        return jsonify({"success": False, "message": "로그인이 필요합니다."}), 401
+    
+    if DB.delete_item(item_name):
+        return jsonify({"success": True, "message": "상품이 삭제되었습니다."})
+    else:
+        return jsonify({"success": False, "message": "상품 삭제에 실패했습니다."}), 500
     
 @app.route("/api/login_confirm", methods=['POST'])
 def login_user():
