@@ -148,6 +148,13 @@ def mypage():
     
     user_id = session['id']
     
+    # 사용자 정보 가져오기
+    user_info = DB.get_user_info(user_id)
+    if not user_info:
+        user_info = {'profile_img': ''}
+    elif not user_info.get('profile_img'):
+        user_info['profile_img'] = ''
+        
     # 전체 상품 가져오기
     all_items = DB.get_items()
     if not all_items:
@@ -159,11 +166,51 @@ def mypage():
     # 내 구매 상품 (구매자가 나인 경우)
     my_purchases = {k: v for k, v in all_items.items() if v.get('buyer') == user_id}
     
+    available_count = sum(1 for item in my_sales.values() if item.get('status') != '거래 완료') 
+    sold_count = sum(1 for item in my_sales.values() if item.get('status') == '거래 완료')
+    
     return render_template('mypage.html', 
-                           user_id=user_id, 
+                           user_id=user_id,
+                           user_info=user_info,
                            my_sales=my_sales.items(), 
-                           my_purchases=my_purchases.items())
+                           my_purchases=my_purchases.items(),
+                           available_count=available_count,
+                           sold_count=sold_count)
 
+@app.route("/api/upload_profile_img", methods=['POST'])
+def upload_profile_img():
+    if 'id' not in session:
+        return jsonify({"success": False, "message": "로그인이 필요합니다."}), 401
+
+    user_id = session['id']
+    file = request.files.get('profile_image')
+
+    if not file:
+        return jsonify({"success": False, "message": "파일이 없습니다."}), 400
+
+    try:
+        # 파일 저장 경로 설정 (uploads/profile 폴더 사용)
+        save_dir = os.path.join(os.getcwd(), "frontend", "uploads", "profile")
+        os.makedirs(save_dir, exist_ok=True)
+
+        # 파일명 중복 방지를 위해 ID와 시간을 조합
+        filename = f"{user_id}_{int(datetime.now().timestamp())}_{file.filename}"
+        save_path = os.path.join(save_dir, filename)
+        file.save(save_path)
+
+        # 웹에서 접근 가능한 경로 (static_url_path 기준)
+        db_path = f"uploads/profile/{filename}"
+
+        # DB 업데이트
+        if DB.update_user_profile_img(user_id, db_path):
+            return jsonify({"success": True, "image_path": db_path})
+        else:
+            return jsonify({"success": False, "message": "DB 업데이트 실패"}), 500
+
+    except Exception as e:
+        print(e)
+        return jsonify({"success": False, "message": "서버 오류"}), 500
+    
 @app.route("/api/login_confirm", methods=['POST'])
 def login_user():
     id_ = request.form.get('id')

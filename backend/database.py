@@ -42,7 +42,8 @@ class DBhandler:
             "id": data.get('id'),
             "pw": pw_hash,
             "email": data.get('email'),
-            "phone": data.get('phone', '') # 선택 항목
+            "phone": data.get('phone', ''), # 선택 항목
+            "profile_img_path": ""
         }
         
         # insert_user 호출 전 ID 중복 체크 (필수)
@@ -62,6 +63,41 @@ class DBhandler:
             value = user.val()
             if value.get('id') == id_ and value.get('pw') == pw_hash:
                 return True
+        return False
+    
+    def get_user_info(self, user_id):
+        """
+        사용자 ID로 사용자 정보를 조회합니다.
+        :param user_id: (str) 사용자 ID
+        :return: (dict) 사용자 정보 또는 None
+        """
+        users = self.db.child("user").get()
+        if not users.val():
+            return None
+        for user in users.each():
+            if user.val().get('id') == user_id:
+                return user.val()
+        return None
+
+    def update_user_profile_img(self, user_id, img_path):
+        """
+        사용자의 프로필 이미지 경로 업데이트
+        :param user_id: (str) 사용자 ID
+        :param img_path: (str) 이미지 경로
+        :return: (bool) 업데이트 성공 여부
+        """
+        users = self.db.child("user").get()
+        target_key = None
+
+        # 해당 user_id를 가진 노드 키(key) 찾기
+        for user in users.each():
+            if user.val().get('id') == user_id:
+                target_key = user.key()
+                break
+
+        if target_key:
+            self.db.child("user").child(target_key).update({"profile_img": img_path})
+            return True
         return False
         
     # 상품 정보 가져오는 함수

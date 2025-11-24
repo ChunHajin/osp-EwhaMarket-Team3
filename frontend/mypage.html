@@ -12,20 +12,23 @@
 
     <div class="card profile">
         <label for="profile-img-upload" class="my-img-area">
-            <div class="my-img"></div>
+            <div class="my-img" id="my-profile-img"
+                {% if user_info.profile_img %}
+                style="background-image: url('/{{ user_info.profile_img }}'); background-size: cover; background-position: center;"
+                {% endif %}>
+            </div>
             <span class="change-photo-text">사진<br>변경</span>
         </label>
-        <input type="file" id="profile-img-upload" accept="image/*" style="display: none;">
+        <input type="file" id="profile-img-upload" name="profile-img" accept="image/*" style="display: none;">
 
         <h3 class="my-name">{{ user_id | default('사용자') }}</h3>
         <p class="seller-info">
-            <span class="product-state" id="available">판매 중 3</span>
-            <span class="product-state" id="sold">판매 완료 1</span>
+            <span class="product-state" id="available">판매 중 {{ available_count }}</span>
+            <span class="product-state" id="sold">판매 완료 {{ sold_count }}</span>
         </p>
 
         <button class="btn btn-green btn-full">개인정보 변경</button>
         <button class="btn btn-white btn-full"><a href="/logout">로그아웃</a></button>
-        <a href="#" class="link-withdraw">회원 탈퇴</a>
     </div>
 
     <div class="activity-section">
@@ -37,15 +40,8 @@
         <div id="list-sales" class="product-grid">
             {% if my_sales|length > 0 %}
             {% for key, item in my_sales %}
-
-            {% set status_class = 'tag-status-used' %}
-            {% if item.status == "상태 최상" %}
-            {% set status_class = 'tag-status-great' %}
-            {% elif item.status == "약간의 하자" %}
-            {% set status_class = 'tag-status-defect' %}
-            {% endif %}
-
-            <div class="product-card {{ 'product-card--sold' if item.status == 'sold' else '' }}">
+            <a href="{{ url_for('product_detail', name=key) }}" style="text-decoration: none; color: inherit;">
+                <div class="product-card {{ 'product-card--sold' if item.status == '거래 완료' else '' }}">
                 <div class="product-card-image">
                     {% if item.img_path %}
                     <img src="{{ item.img_path }}" alt="{{ item.title }}"
@@ -53,6 +49,13 @@
                     {% endif %}
                 </div>
                 <div class="product-card-content">
+                    {% set status_class = 'tag-status-used' %}
+                    {% if item.status == "상태 최상" %}
+                    {% set status_class = 'tag-status-great' %}
+                    {% elif item.status == "약간의 하자" %}
+                    {% set status_class = 'tag-status-defect' %}
+                    {% endif %}
+
                     <span class="tag-status {{ status_class }}">
                         {{ item.status | default('상태 없음') }}
                     </span>
@@ -62,12 +65,13 @@
                     <div class="product-meta-row">
                         <p class="product-price">{{ item.price }}원</p>
                     </div>
-                    <div class="manage-buttons">
+                    <div class="manage-buttons" onclick="event.preventDefault(); event.stopPropagation();">
                         <button class="btn-text-small">수정</button> |
                         <button class="btn-text-small">삭제</button>
                     </div>
                 </div>
             </div>
+            </a>
             {% endfor %}
             {% else %}
             <p style="padding: 20px; grid-column: 1 / -1;">판매 내역이 없습니다.</p>
@@ -77,14 +81,7 @@
         <div id="list-purchases" class="product-grid" style="display: none;">
             {% if my_purchases|length > 0 %}
             {% for key, item in my_purchases %}
-
-            {% set status_class = 'tag-status-used' %}
-            {% if item.status == "상태 최상" %}
-            {% set status_class = 'tag-status-great' %}
-            {% elif item.status == "약간의 하자" %}
-            {% set status_class = 'tag-status-defect' %}
-            {% endif %}
-
+            <a href="{{ url_for('product_detail', name=key) }}" style="text-decoration: none; color: inherit;">
             <div class="product-card">
                 <div class="product-card-image">
                     {% if item.img_path %}
@@ -93,6 +90,13 @@
                     {% endif %}
                 </div>
                 <div class="product-card-content">
+                    {% set status_class = 'tag-status-used' %}
+                    {% if item.status == "상태 최상" %}
+                    {% set status_class = 'tag-status-great' %}
+                    {% elif item.status == "약간의 하자" %}
+                    {% set status_class = 'tag-status-defect' %}
+                    {% endif %}
+
                     <span class="tag-status {{ status_class }}">
                         {{ item.status }}
                     </span>
@@ -101,26 +105,16 @@
                     <div class="product-meta-row">
                         <p class="product-price">{{ item.price }}원</p>
                     </div>
-                    <div class="manage-buttons">
-
+                    <div class="manage-buttons" onclick="event.preventDefault(); event.stopPropagation();">
                         <a href="{{ url_for('review_write') }}?item_name={{ item.title }}" class="btn-text-small btn-green-text">리뷰 작성</a>
-
                     </div>
                 </div>
             </div>
+            </a>
             {% endfor %}
             {% else %}
             <p style="padding: 20px; grid-column: 1 / -1;">구매 내역이 없습니다.</p>
             {% endif %}
-        </div>
-        <div class="pagination">
-            <nav aria-label="Page navigation">
-                <ul class="pagination-list">
-                    <li><a href="#" aria-current="page" class="active">1</a></li>
-                    <li><a href="#">2</a></li>
-                    <li><a href="#">3</a></li>
-                </ul>
-            </nav>
         </div>
 
         <script>
@@ -148,6 +142,41 @@
                     salesBtn.classList.remove('btn-pill-active');
                 }
             }
+
+            async function uploadProfileImage(input) {
+                if (input.files && input.files[0]) {
+                    const formData = new FormData();
+                    formData.append('profile_image', input.files[0]);
+
+                    try {
+                        const response = await fetch('/api/upload_profile_img', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const result = await response.json();
+
+                        if (result.success) {
+                            // 업로드 성공 시 즉시 이미지 변경 반영
+                            const imgDiv = document.getElementById('my-profile-img');
+                            // 캐시 방지를 위해 랜덤 쿼리스트링 추가
+                            imgDiv.style.backgroundImage = `url('/${result.image_path}?t=${new Date().getTime()}')`;
+                            imgDiv.style.backgroundSize = 'cover';
+                            imgDiv.style.backgroundPosition = 'center';
+                            alert("프로필 사진이 변경되었습니다.");
+                        } else {
+                            alert(result.message || "사진 업로드 실패");
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert("서버 통신 오류가 발생했습니다.");
+                    }
+                }
+            }
+
+            // 파일 input에 change 이벤트 리스너 추가
+            document.getElementById('profile-img-upload').addEventListener('change', function() {
+                uploadProfileImage(this);
+            });
         </script>
     </div>
 </main>
