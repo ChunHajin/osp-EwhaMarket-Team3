@@ -434,10 +434,12 @@ def purchase_item_api():
     buyer_id = session['id']
     
     # 2. DB 업데이트 요청
-    if DB.purchase_item(item_name, buyer_id):
-        return jsonify({"success": True})
+    success, message = DB.purchase_item(item_name, buyer_id)
+    if success:
+        return jsonify({"success": True, "message": message})
     else:
-        return jsonify({"success": False, "message": "구매 처리에 실패했습니다."}), 500
+        # 이미 거래 완료 등 클라이언트에 보여줄 메시지가 있는 경우 400으로 응답
+        return jsonify({"success": False, "message": message}), 400
     
     
 # -------------------- 여기부터 좋아요 기능 API 추가 --------------------
