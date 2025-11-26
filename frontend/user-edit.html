@@ -1,0 +1,99 @@
+{% extends "index.html" %}
+
+{% block title %}개인정보 수정 | 이화마켓{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="css/signup.css">
+{% endblock %}
+
+{% block section %}
+    <div class="auth-container">
+        <div class="auth-form-wrapper">
+            <div class="card">
+                <div class="auth-title">
+                    <h1>개인정보 수정</h1>
+                </div>
+                <form id="edit-form" method="post" onsubmit="return submitUserEdit(event)">
+                    
+                    <div class="form-group">
+                        <label for="current-password" class="form-label">현재 비밀번호 (필수)</label>
+                        <input type="password" id="current-password" name="current_pw" class="form-input" required>
+                    </div>
+                    
+                    <hr style="border-top: 1px solid #eee; margin: 1.5rem 0;">
+
+                    <div class="form-group">
+                        <label for="new-password" class="form-label">새 비밀번호 (선택)</label>
+                        <input type="password" id="new-password" name="new_pw" class="form-input" placeholder="변경하려면 입력하세요">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-password-confirm" class="form-label">새 비밀번호 확인</label>
+                        <input type="password" id="new-password-confirm" name="new_pw_confirm" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="email" class="form-label">이메일 주소 (필수)</label>
+                        <input type="email" id="email" name="email" class="form-input" value="{{ user_info.email }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone" class="form-label">핸드폰 번호 (선택)</label>
+                        <input type="tel" id="phone" name="phone" class="form-input" value="{{ user_info.phone | default('') }}">
+                    </div>
+                    <div style="padding-top: 0.5rem;">
+                        <button type="submit" class="btn btn-green btn-full" style="padding: 0.625rem 0;">수정 완료</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        async function submitUserEdit(e) {
+            e.preventDefault(); // 기본 폼 제출 방지
+
+            const currentPw = document.getElementById('current-password').value;
+            const newPw = document.getElementById('new-password').value;
+            const newPwConfirm = document.getElementById('new-password-confirm').value;
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+
+            if (!currentPw) {
+                alert('현재 비밀번호를 입력하세요.');
+                return false;
+            }
+
+            if (newPw && newPw !== newPwConfirm) {
+                alert('새 비밀번호가 일치하지 않습니다.');
+                return false;
+            }
+
+            // 폼 데이터를 JSON 형식으로 변환
+            const formData = new FormData(document.getElementById('edit-form'));
+            const data = {};
+            formData.forEach((value, key) => { data[key] = value; });
+
+            try {
+                const resp = await fetch('/submit_user_edit', {
+                    method: 'POST',
+                    body: formData // FormData 그대로 사용 (Flask는 request.form으로 받음)
+                });
+                const result = await resp.json();
+
+                if (result.success) {
+                    alert(result.message);
+                    // 성공적으로 수정 후 새 창 닫고, 부모 창 (마이페이지) 새로고침
+                    if (window.opener) {
+                        window.opener.location.reload();
+                    }
+                    window.close();
+                } else {
+                    alert(result.message || '개인정보 수정 실패');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('서버 통신 중 오류가 발생했습니다.');
+            }
+        }
+    </script>
+{% endblock %}

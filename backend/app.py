@@ -177,6 +177,7 @@ def mypage():
                            available_count=available_count,
                            sold_count=sold_count)
 
+
 @app.route("/api/upload_profile_img", methods=['POST'])
 def upload_profile_img():
     if 'id' not in session:
@@ -210,6 +211,61 @@ def upload_profile_img():
     except Exception as e:
         print(e)
         return jsonify({"success": False, "message": "서버 오류"}), 500
+
+
+@app.route('/user-edit.html')
+def user_edit_page():
+    if 'id' not in session:
+        return redirect(url_for('login_page'))
+    
+    user_id = session.get('id')
+    user_info = DB.get_user_info(user_id)
+
+    if not user_info:
+        return "사용자 정보를 찾을 수 없습니다.", 404
+        
+    return render_template("user-edit.html", user_info=user_info)
+
+
+@app.route("/submit_user_edit", methods=['POST'])
+def submit_user_edit():
+    # 1. 로그인 여부 확인
+    if 'id' not in session:
+        return jsonify({"success": False, "message": "로그인이 필요합니다."}), 401
+
+    user_id = session['id']
+    data = request.form
+    
+    # 2. 현재 비밀번호 확인
+    current_pw = data.get('current_pw')
+    if not current_pw:
+        return jsonify({"success": False, "message": "현재 비밀번호를 입력해야 개인정보를 수정할 수 있습니다."}), 400
+
+    # 현재 비밀번호 해시
+    current_pw_hash = hashlib.sha256(current_pw.encode('utf-8')).hexdigest()
+    
+    # DB에서 아이디/비밀번호 매칭 확인
+    if not DB.find_user(user_id, current_pw_hash):
+        return jsonify({"success": False, "message": "현재 비밀번호가 일치하지 않습니다."}), 401
+
+    # 3. 새 비밀번호 처리
+    new_pw = data.get('new_pw')
+    new_pw_confirm = data.get('new_pw_confirm')
+    pw_to_update = current_pw_hash # 기본값은 기존 비밀번호 해시
+
+    if new_pw:
+        if new_pw != new_pw_confirm:
+            return jsonify({"success": False, "message": "새 비밀번호와 확인이 일치하지 않습니다."}), 400
+        # 새 비밀번호 해시
+        pw_to_update = hashlib.sha256(new_pw.encode('utf-8')).hexdigest()
+    
+    # 4. DB 업데이트
+    success = DB.update_user_info(user_id, pw_to_update, data.get('email'), data.get('phone'))
+
+    if success:
+        return jsonify({"success": True, "message": "개인정보가 성공적으로 수정되었습니다."})
+    else:
+        return jsonify({"success": False, "message": "DB 업데이트에 실패했습니다."}), 500
 
 @app.route('/product-update.html')
 def update_item_page():

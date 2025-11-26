@@ -67,7 +67,7 @@ class DBhandler:
     
     def get_user_info(self, user_id):
         """
-        사용자 ID로 사용자 정보를 조회합니다.
+        사용자 ID로 사용자 정보를 조회
         :param user_id: (str) 사용자 ID
         :return: (dict) 사용자 정보 또는 None
         """
@@ -97,6 +97,30 @@ class DBhandler:
 
         if target_key:
             self.db.child("user").child(target_key).update({"profile_img": img_path})
+            return True
+        return False
+    
+    def update_user_info(self, user_id, pw_hash, email, phone):
+        """
+        사용자 정보 수정
+        """
+        users = self.db.child("user").get()
+        target_key = None
+
+        # 해당 user_id를 가진 노드 키(key) 찾기
+        for user in users.each():
+            if user.val().get('id') == user_id:
+                target_key = user.key()
+                break
+
+        if target_key:
+            update_data = {
+                "pw": pw_hash,
+                "email": email,
+                "phone": phone
+            }
+            # Firebase Realtime DB 업데이트
+            self.db.child("user").child(target_key).update(update_data)
             return True
         return False
         
@@ -160,7 +184,7 @@ class DBhandler:
     # 마이페이지의 상품 수정 함수
     def update_item(self, original_key, new_data, img_path, author_id, new_key=None):
         """
-        기존 상품 정보를 업데이트합니다.
+        기존 상품 정보 업데이트
         :param original_key: (str) 기존 상품 이름 (Firebase Key)
         :param new_data: (dict) 업데이트할 폼 데이터
         :param img_path: (str) 새로 업로드된 이미지 경로 (없으면 "")
@@ -170,10 +194,8 @@ class DBhandler:
         """
         existing_data = self.db.child("item").child(original_key).get().val()
         
-        # 1. 이미지 경로 처리: 새 이미지가 없으면 기존 이미지 경로 유지
         final_img_path = img_path if img_path else existing_data.get("img_path", "")
         
-        # 2. 업데이트될 데이터 구성
         item_info = {
             "title": new_data.get("title"),
             "price": new_data.get("price"),
@@ -186,7 +208,6 @@ class DBhandler:
             "trade_method": new_data.get("trade_method")
         }
         
-        # 3. 키(상품명) 변경 여부에 따라 처리
         if new_key and new_key != original_key:
             # 키 변경 시: 기존 노드 삭제 후 새 노드 생성
             self.db.child("item").child(original_key).remove()

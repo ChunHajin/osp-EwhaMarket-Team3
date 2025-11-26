@@ -27,8 +27,8 @@
             <span class="product-state" id="sold">판매 완료 {{ sold_count }}</span>
         </p>
 
-        <button class="btn btn-green btn-full">개인정보 변경</button>
-        <button class="btn btn-white btn-full"><a href="/logout">로그아웃</a></button>
+        <button class="btn btn-green btn-full" onclick="openUserEdit()">개인정보 변경</button>
+        <button class="btn btn-white btn-full" onclick="location.href='{{ url_for('logout') }}'">로그아웃</button>
     </div>
 
     <div class="activity-section">
@@ -198,6 +198,10 @@
                         alert("서버 통신 오류가 발생했습니다.");
                     });
                 }
+            }
+
+            function openUserEdit() {
+                window.open('{{ url_for("user_edit_page") }}', '_blank');
             }
 
             // 파일 input에 change 이벤트 리스너 추가
