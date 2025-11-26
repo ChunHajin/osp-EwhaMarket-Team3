@@ -169,17 +169,25 @@ class DBhandler:
     def purchase_item(self, name, buyer_id):
         """
         상품 구매 처리: 구매자 ID 등록 및 상태를 '거래 완료'로 변경
-        """
-        update_data = {
-            "buyer": buyer_id,
-            "status": "거래 완료"
-        }
+        """        
         try:
+            current = self.db.child("item").child(name).get().val()
+            if not current:
+                return False, "상품을 찾을 수 없습니다."
+
+            # 이미 거래 완료 상태라면 구매 불가 안내
+            if str(current.get('status', '')).strip() == '거래 완료' or current.get('buyer'):
+                return False, "이미 거래 완료된 상품입니다."
+
+            update_data = {
+                "buyer": buyer_id,
+                "status": "거래 완료"
+            }
             self.db.child("item").child(name).update(update_data)
-            return True
+            return True, "구매가 완료되었습니다."
         except Exception as e:
             print(f"Purchase Error: {e}")
-            return False
+            return False, "구매 처리에 실패했습니다."
         
     # 마이페이지의 상품 수정 함수
     def update_item(self, original_key, new_data, img_path, author_id, new_key=None):

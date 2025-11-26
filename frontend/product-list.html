@@ -22,13 +22,9 @@
       {% if total > 0 %}
         {% for key, value in datas %}
           
-            {% set is_sold = (value.status == 'sold' or value.status == '판매 완료') %}
-            {% if not is_sold %}
-              <a href="{{ url_for('product_detail', name=key) }}" style="text-decoration: none; color: inherit;">
-                <div class="product-card">
-            {% else %}
-                <div class="product-card product-card--sold" role="button" aria-disabled="true" tabindex="0">
-            {% endif %}
+            {% set is_sold = (value.status | default('') | trim) == '거래 완료' %}
+            <a href="{{ url_for('product_detail', name=key) }}" style="text-decoration: none; color: inherit;">
+              <div class="product-card {{ 'product-card--sold' if is_sold else '' }}">
               
               <div class="product-card-image">
                 {% if value.img_path %}
@@ -45,8 +41,8 @@
                 {% endif %}
 
                 {% set display_status = value.status | default('상태 없음') %}
-                {% if value.status == 'sold' or value.status == '판매 완료' %}
-                  {% set display_status = '판매 완료' %}
+                {% if (value.status | default('') | trim) == '거래 완료' %}
+                  {% set display_status = '거래 완료' %}
                 {% endif %}
 
                 <span class="tag-status {{ status_class }}">
@@ -70,9 +66,7 @@
                 </div>
               </div>
             </div>
-            {% if not is_sold %}
-              </a>
-            {% endif %}
+            </a>
           {% endfor %}
       
       {% else %}
