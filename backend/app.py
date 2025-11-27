@@ -148,6 +148,13 @@ def mypage():
     
     user_id = session['id']
     
+    # 사용자 정보 가져오기
+    user_info = DB.get_user_info(user_id)
+    if not user_info:
+        user_info = {'profile_img': ''}
+    elif not user_info.get('profile_img'):
+        user_info['profile_img'] = ''
+        
     # 전체 상품 가져오기
     all_items = DB.get_items()
     if not all_items:
@@ -159,11 +166,190 @@ def mypage():
     # 내 구매 상품 (구매자가 나인 경우)
     my_purchases = {k: v for k, v in all_items.items() if v.get('buyer') == user_id}
     
-    return render_template('mypage.html', 
-                           user_id=user_id, 
-                           my_sales=my_sales.items(), 
-                           my_purchases=my_purchases.items())
+     # 각 구매한 상품에 대해 리뷰 존재 여부 확인
+    purchase_review_status = {}
+    for item_key in my_purchases.keys():
+        purchase_review_status[item_key] = DB.check_review_exists(item_key, user_id)
 
+    available_count = sum(1 for item in my_sales.values() if item.get('status') != '거래 완료')
+    sold_count = sum(1 for item in my_sales.values() if item.get('status') == '거래 완료')
+
+    return render_template('mypage.html',
+                           user_id=user_id,
+                           user_info=user_info,
+                           my_sales=my_sales.items(),
+                           my_purchases=my_purchases.items(),
+                           purchase_review_status=purchase_review_status,
+                           available_count=available_count,
+                           sold_count=sold_count)
+
+
+@app.route("/api/upload_profile_img", methods=['POST'])
+def upload_profile_img():
+    if 'id' not in session:
+        return jsonify({"success": False, "message": "로그인이 필요합니다."}), 401
+
+    user_id = session['id']
+    file = request.files.get('profile_image')
+
+    if not file:
+        return jsonify({"success": False, "message": "파일이 없습니다."}), 400
+
+    try:
+        # 파일 저장 경로 설정 (uploads/profile 폴더 사용)
+        save_dir = os.path.join(os.getcwd(), "frontend", "uploads", "profile")
+        os.makedirs(save_dir, exist_ok=True)
+
+        # 파일명 중복 방지를 위해 ID와 시간을 조합
+        filename = f"{user_id}_{int(datetime.now().timestamp())}_{file.filename}"
+        save_path = os.path.join(save_dir, filename)
+        file.save(save_path)
+
+        # 웹에서 접근 가능한 경로 (static_url_path 기준)
+        db_path = f"uploads/profile/{filename}"
+
+        # DB 업데이트
+        if DB.update_user_profile_img(user_id, db_path):
+            return jsonify({"success": True, "image_path": db_path})
+        else:
+            return jsonify({"success": False, "message": "DB 업데이트 실패"}), 500
+
+    except Exception as e:
+        print(e)
+        return jsonify({"success": False, "message": "서버 오류"}), 500
+
+
+@app.route('/user-edit.html')
+def user_edit_page():
+    if 'id' not in session:
+        return redirect(url_for('login_page'))
+    
+    user_id = session.get('id')
+    user_info = DB.get_user_info(user_id)
+
+    if not user_info:
+        return "사용자 정보를 찾을 수 없습니다.", 404
+        
+    return render_template("user-edit.html", user_info=user_info)
+
+
+@app.route("/submit_user_edit", methods=['POST'])
+def submit_user_edit():
+    # 1. 로그인 여부 확인
+    if 'id' not in session:
+        return jsonify({"success": False, "message": "로그인이 필요합니다."}), 401
+
+    user_id = session['id']
+    data = request.form
+    
+    # 2. 현재 비밀번호 확인
+    current_pw = data.get('current_pw')
+    if not current_pw:
+        return jsonify({"success": False, "message": "현재 비밀번호를 입력해야 개인정보를 수정할 수 있습니다."}), 400
+
+    # 현재 비밀번호 해시
+    current_pw_hash = hashlib.sha256(current_pw.encode('utf-8')).hexdigest()
+    
+    # DB에서 아이디/비밀번호 매칭 확인
+    if not DB.find_user(user_id, current_pw_hash):
+        return jsonify({"success": False, "message": "현재 비밀번호가 일치하지 않습니다."}), 401
+
+    # 3. 새 비밀번호 처리
+    new_pw = data.get('new_pw')
+    new_pw_confirm = data.get('new_pw_confirm')
+    pw_to_update = current_pw_hash # 기본값은 기존 비밀번호 해시
+
+    if new_pw:
+        if new_pw != new_pw_confirm:
+            return jsonify({"success": False, "message": "새 비밀번호와 확인이 일치하지 않습니다."}), 400
+        # 새 비밀번호 해시
+        pw_to_update = hashlib.sha256(new_pw.encode('utf-8')).hexdigest()
+    
+    # 4. DB 업데이트
+    success = DB.update_user_info(user_id, pw_to_update, data.get('email'), data.get('phone'))
+
+    if success:
+        return jsonify({"success": True, "message": "개인정보가 성공적으로 수정되었습니다."})
+    else:
+        return jsonify({"success": False, "message": "DB 업데이트에 실패했습니다."}), 500
+
+@app.route('/product-update.html')
+def update_item_page():
+    if 'id' not in session:
+        return redirect(url_for('login_page'))
+    
+    user_id = session.get('id')
+    
+    item_key = request.args.get('key')
+    item_data = None
+    
+    if item_key:
+        item_data = DB.get_item_byname(item_key)
+        
+        # 상품이 없거나, 내가 등록한 상품이 아닌 경우 접근 제어
+        if not item_data or item_data.get('author') != user_id:
+            # 권한이 없거나 상품이 없으면 마이페이지로 돌려보냄
+            return redirect(url_for('mypage'))
+        
+    else:
+        # 키가 없으면 마이페이지로 돌려보냄
+        return redirect(url_for('mypage'))
+        
+    return render_template('product-update.html', 
+                           item_data=item_data, 
+                           item_key=item_key,
+                           user_id=user_id)
+
+@app.route("/submit_item_update", methods=["POST"])
+def submit_item_update():
+    author_id = session.get('id', 'unknown_user')
+    if author_id == 'unknown_user':
+        return redirect(url_for('login_page'))
+        
+    try:
+        data = request.form
+        original_key = data.get("original_key") # hidden 필드에서 가져온 기존 키
+        key_name = data.get("title", "unnamed_item") # 폼에서 입력된 새 상품명
+        
+        if not original_key:
+            return "<h3>❌ 오류 발생: 수정할 상품 키가 누락되었습니다.</h3>", 400
+        
+        image_file = request.files.get("photos")
+        img_path = ""
+        
+        if image_file and image_file.filename:
+            import time
+            save_dir = os.path.join(os.getcwd(), "frontend", "uploads")
+            os.makedirs(save_dir, exist_ok=True) 
+            
+            unique_filename = f"{key_name}_{int(time.time())}_{image_file.filename}"
+            img_path = f"uploads/{unique_filename}"
+            image_file.save(os.path.join(save_dir, unique_filename))
+        
+        DB.update_item(original_key, data, img_path, author_id, new_key=key_name)
+        
+        return f"""
+        <html><body style='font-family:sans-serif; text-align:center;'>
+        <h2>상품이 성공적으로 수정되었습니다 ✅</h2>
+        <p><b>상품명:</b> {key_name}</p>
+        <p><a href='/mypage.html'>마이페이지로 돌아가기</a></p>
+        </body></html>
+        """
+
+    except Exception as e:
+        print(f"상품 수정 중 오류 발생: {e}")
+        return f"<h3>❌ 오류 발생: {e}</h3>", 500
+    
+@app.route("/api/delete_item/<item_name>", methods=['POST'])
+def delete_item_api(item_name):
+    if 'id' not in session:
+        return jsonify({"success": False, "message": "로그인이 필요합니다."}), 401
+    
+    if DB.delete_item(item_name):
+        return jsonify({"success": True, "message": "상품이 삭제되었습니다."})
+    else:
+        return jsonify({"success": False, "message": "상품 삭제에 실패했습니다."}), 500
+    
 @app.route("/api/login_confirm", methods=['POST'])
 def login_user():
     id_ = request.form.get('id')
@@ -310,10 +496,12 @@ def purchase_item_api():
     buyer_id = session['id']
     
     # 2. DB 업데이트 요청
-    if DB.purchase_item(item_name, buyer_id):
-        return jsonify({"success": True})
+    success, message = DB.purchase_item(item_name, buyer_id)
+    if success:
+        return jsonify({"success": True, "message": message})
     else:
-        return jsonify({"success": False, "message": "구매 처리에 실패했습니다."}), 500
+        # 이미 거래 완료 등 클라이언트에 보여줄 메시지가 있는 경우 400으로 응답
+        return jsonify({"success": False, "message": message}), 400
     
     
 # -------------------- 여기부터 좋아요 기능 API 추가 --------------------

@@ -42,7 +42,8 @@ class DBhandler:
             "id": data.get('id'),
             "pw": pw_hash,
             "email": data.get('email'),
-            "phone": data.get('phone', '') # 선택 항목
+            "phone": data.get('phone', ''), # 선택 항목
+            "profile_img_path": ""
         }
         
         # insert_user 호출 전 ID 중복 체크 (필수)
@@ -62,6 +63,65 @@ class DBhandler:
             value = user.val()
             if value.get('id') == id_ and value.get('pw') == pw_hash:
                 return True
+        return False
+    
+    def get_user_info(self, user_id):
+        """
+        사용자 ID로 사용자 정보를 조회
+        :param user_id: (str) 사용자 ID
+        :return: (dict) 사용자 정보 또는 None
+        """
+        users = self.db.child("user").get()
+        if not users.val():
+            return None
+        for user in users.each():
+            if user.val().get('id') == user_id:
+                return user.val()
+        return None
+
+    def update_user_profile_img(self, user_id, img_path):
+        """
+        사용자의 프로필 이미지 경로 업데이트
+        :param user_id: (str) 사용자 ID
+        :param img_path: (str) 이미지 경로
+        :return: (bool) 업데이트 성공 여부
+        """
+        users = self.db.child("user").get()
+        target_key = None
+
+        # 해당 user_id를 가진 노드 키(key) 찾기
+        for user in users.each():
+            if user.val().get('id') == user_id:
+                target_key = user.key()
+                break
+
+        if target_key:
+            self.db.child("user").child(target_key).update({"profile_img": img_path})
+            return True
+        return False
+    
+    def update_user_info(self, user_id, pw_hash, email, phone):
+        """
+        사용자 정보 수정
+        """
+        users = self.db.child("user").get()
+        target_key = None
+
+        # 해당 user_id를 가진 노드 키(key) 찾기
+        for user in users.each():
+            if user.val().get('id') == user_id:
+                target_key = user.key()
+                break
+
+        if target_key:
+            update_data = {
+                "pw": pw_hash,
+                "email": email,
+                "phone": phone
+            }
+            # Firebase Realtime DB 업데이트
+            self.db.child("user").child(target_key).update(update_data)
+            return True
         return False
         
     # 상품 정보 가져오는 함수
@@ -109,16 +169,77 @@ class DBhandler:
     def purchase_item(self, name, buyer_id):
         """
         상품 구매 처리: 구매자 ID 등록 및 상태를 '거래 완료'로 변경
-        """
-        update_data = {
-            "buyer": buyer_id,
-            "status": "거래 완료"
-        }
+        """        
         try:
+            current = self.db.child("item").child(name).get().val()
+            if not current:
+                return False, "상품을 찾을 수 없습니다."
+
+            # 이미 거래 완료 상태라면 구매 불가 안내
+            if str(current.get('status', '')).strip() == '거래 완료' or current.get('buyer'):
+                return False, "이미 거래 완료된 상품입니다."
+
+            update_data = {
+                "buyer": buyer_id,
+                "status": "거래 완료"
+            }
             self.db.child("item").child(name).update(update_data)
-            return True
+            return True, "구매가 완료되었습니다."
         except Exception as e:
             print(f"Purchase Error: {e}")
+            return False, "구매 처리에 실패했습니다."
+        
+    # 마이페이지의 상품 수정 함수
+    def update_item(self, original_key, new_data, img_path, author_id, new_key=None):
+        """
+        기존 상품 정보 업데이트
+        :param original_key: (str) 기존 상품 이름 (Firebase Key)
+        :param new_data: (dict) 업데이트할 폼 데이터
+        :param img_path: (str) 새로 업로드된 이미지 경로 (없으면 "")
+        :param author_id: (str) 작성자 ID
+        :param new_key: (str) 변경된 상품 이름 (선택 사항)
+        :return: (bool) 업데이트 성공 여부
+        """
+        existing_data = self.db.child("item").child(original_key).get().val()
+        
+        final_img_path = img_path if img_path else existing_data.get("img_path", "")
+        
+        item_info = {
+            "title": new_data.get("title"),
+            "price": new_data.get("price"),
+            "region": new_data.get("region"),
+            "status": new_data.get("status"),
+            "desc": new_data.get("desc"),
+            "author": author_id, 
+            "img_path": final_img_path,
+            "category": new_data.get("category"),
+            "trade_method": new_data.get("trade_method")
+        }
+        
+        if new_key and new_key != original_key:
+            # 키 변경 시: 기존 노드 삭제 후 새 노드 생성
+            self.db.child("item").child(original_key).remove()
+            self.db.child("item").child(new_key).set(item_info)
+            print(f"✅ Firebase Item Updated (Key Change: {original_key} -> {new_key})")
+        else:
+            # 키 유지 시: 기존 노드 덮어쓰기
+            self.db.child("item").child(original_key).set(item_info)
+            print(f"✅ Firebase Item Updated (Key Maintained: {original_key})")
+            
+        return True
+    
+    # 마이페이지의 상품 삭제 함수
+    def delete_item(self, item_name):
+        """
+        특정 상품 정보를 DB에서 삭제하고 연관된 좋아요 정보도 삭제
+        """
+        try:
+            self.db.child("item").child(item_name).remove()
+            self.db.child("likes").child(item_name).remove() # 연관된 좋아요 정보도 삭제
+            print(f"✅ Firebase Item {item_name} deleted.")
+            return True
+        except Exception as e:
+            print(f"Delete Item Error: {e}")
             return False
         
     # 리뷰 등록 함수
@@ -150,6 +271,18 @@ class DBhandler:
         """
         review_data = self.db.child("review").child(review_key).get().val()
         return review_data
+    
+    # 리뷰 존재 여부 확인 함수
+    def check_review_exists(self, item_name, user_id):
+        """
+        특정 상품에 대한 사용자의 리뷰가 존재하는지 확인
+        :param item_name: (str) 상품 이름
+        :param user_id: (str) 사용자 ID
+        :return: (bool) 리뷰 존재 여부
+        """
+        review_key = f"{item_name}_{user_id}"
+        review_data = self.db.child("review").child(review_key).get().val()
+        return review_data is not None
     
      # -------------------- 좋아요 기능 추가 --------------------
 
