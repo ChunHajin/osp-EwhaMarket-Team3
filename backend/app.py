@@ -166,14 +166,20 @@ def mypage():
     # 내 구매 상품 (구매자가 나인 경우)
     my_purchases = {k: v for k, v in all_items.items() if v.get('buyer') == user_id}
     
-    available_count = sum(1 for item in my_sales.values() if item.get('status') != '거래 완료') 
+     # 각 구매한 상품에 대해 리뷰 존재 여부 확인
+    purchase_review_status = {}
+    for item_key in my_purchases.keys():
+        purchase_review_status[item_key] = DB.check_review_exists(item_key, user_id)
+
+    available_count = sum(1 for item in my_sales.values() if item.get('status') != '거래 완료')
     sold_count = sum(1 for item in my_sales.values() if item.get('status') == '거래 완료')
-    
-    return render_template('mypage.html', 
+
+    return render_template('mypage.html',
                            user_id=user_id,
                            user_info=user_info,
-                           my_sales=my_sales.items(), 
+                           my_sales=my_sales.items(),
                            my_purchases=my_purchases.items(),
+                           purchase_review_status=purchase_review_status,
                            available_count=available_count,
                            sold_count=sold_count)
 

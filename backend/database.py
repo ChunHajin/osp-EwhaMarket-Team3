@@ -272,6 +272,18 @@ class DBhandler:
         review_data = self.db.child("review").child(review_key).get().val()
         return review_data
     
+    # 리뷰 존재 여부 확인 함수
+    def check_review_exists(self, item_name, user_id):
+        """
+        특정 상품에 대한 사용자의 리뷰가 존재하는지 확인
+        :param item_name: (str) 상품 이름
+        :param user_id: (str) 사용자 ID
+        :return: (bool) 리뷰 존재 여부
+        """
+        review_key = f"{item_name}_{user_id}"
+        review_data = self.db.child("review").child(review_key).get().val()
+        return review_data is not None
+    
      # -------------------- 좋아요 기능 추가 --------------------
 
     def get_like_status(self, item_name, user_id):

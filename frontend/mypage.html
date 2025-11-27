@@ -81,8 +81,8 @@
         <div id="list-purchases" class="product-grid" style="display: none;">
             {% if my_purchases|length > 0 %}
             {% for key, item in my_purchases %}
-            <a href="{{ url_for('product_detail', name=key) }}" style="text-decoration: none; color: inherit;">
-            <div class="product-card">
+            <div class="product-card" onclick="window.location.href='{{ url_for('product_detail', name=key) }}'">
+        
                 <div class="product-card-image">
                     {% if item.img_path %}
                     <img src="{{ item.img_path }}" alt="{{ item.title }}"
@@ -105,12 +105,15 @@
                     <div class="product-meta-row">
                         <p class="product-price">{{ item.price }}원</p>
                     </div>
-                    <div class="manage-buttons" onclick="event.preventDefault(); event.stopPropagation();">
-                        <a href="{{ url_for('review_write') }}?item_name={{ item.title }}" class="btn-text-small btn-green-text">리뷰 작성</a>
+                    <div class="manage-buttons" onclick="event.stopPropagation();">
+                        {% if purchase_review_status.get(key) %}
+                        <a href="{{ url_for('review_detail_by_key', review_key=key ~ '_' ~ user_id) }}" class="btn-text-small btn-green-text">리뷰 보기</a>
+                        {% else %}
+                        <a href="{{ url_for('review_write') }}?item_name={{ item.title | urlencode }}" class="btn-text-small btn-green-text">리뷰 작성</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
-            </a>
             {% endfor %}
             {% else %}
             <p style="padding: 20px; grid-column: 1 / -1;">구매 내역이 없습니다.</p>
