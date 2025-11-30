@@ -447,25 +447,36 @@ def submit_item_post():
 
 @app.route('/product-list.html')
 def product_list():
-    page = request.args.get("page", 1, type=int) 
-    per_page = 4 
+    # 페이지네이션
+    page = request.args.get("page", 1, type=int)
+    per_page = 4
     start_idx = per_page * (page - 1)
     end_idx = per_page * page
-    data = DB.get_items() 
-    
-    if not data:
-        data = {}
 
-    item_counts = len(data)
-    page_count = (item_counts + per_page - 1) // per_page
-    datas_for_page = dict(list(data.items())[start_idx:end_idx])
+    # 카테고리 필터
+    selected_category = request.args.get('category', '전체')
+
+    all_items = DB.get_items() or {}
+
+    # 특정 카테고리가 선택된 경우 (전체가 아닌 경우) 필터링
+    if selected_category and selected_category != '전체':
+        filtered_items = {k: v for k, v in all_items.items() if (v.get('category') == selected_category)}
+    else:
+        filtered_items = all_items
+
+    item_counts = len(filtered_items)
+    page_count = (item_counts + per_page - 1) // per_page if item_counts > 0 else 1
+
+    # 현재 페이지에 해당하는 아이템 슬라이스
+    datas_for_page = dict(list(filtered_items.items())[start_idx:end_idx])
 
     return render_template(
-        "product-list.html", 
+        "product-list.html",
         datas=datas_for_page.items(),
         total=item_counts,
         page=page,
-        page_count=page_count 
+        page_count=page_count,
+        selected_category=selected_category
     )
 
 @app.route('/product-detail.html')
