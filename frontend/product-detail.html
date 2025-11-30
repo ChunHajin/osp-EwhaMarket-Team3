@@ -16,22 +16,21 @@
               <img src="/{{ data.img_path }}" alt="{{ data.title }}" style="width:100%; height:100%; object-fit:cover;">
             {% endif %}
           </div>
-          <div class="product-image-gallery">
-            <div class="product-image-thumb product-image-thumb-active"></div>
-            <div class="product-image-thumb"></div>
-          </div>
         </div>
 
         <div>
           <div class="seller-info">
-            <div class="seller-avatar"></div>
+            <div class="seller-avatar" 
+                 {% if seller_info and seller_info.profile_img %}
+                 style="background-image: url('/{{ seller_info.profile_img }}'); background-size: cover; background-position: center;"
+                 {% endif %}></div>
             <div>
               <p class="seller-name">{{ data.author | default('판매자') }}</p>
               <p class="seller-location">서울 서대문구 대신동</p> </div>
           </div>
 
           <h1 class="product-title">{{ data.title | default(name) }}</h1>
-          <p class="product-meta">{{ data.category | default('전체') }} ・ 3시간 전</p> <p class="product-price">{{ data.price | default(0) | int }}원</p>
+          <p class="product-meta">{{ data.category | default('전체') }} ・ {{ format_time_ago(data.created_at) if data.created_at }}</p> <p class="product-price">{{ data.price | default(0) | int }}원</p>
 
           <div class="product-description-container">
             <h2 class="product-description-title">상품설명</h2>

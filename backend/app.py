@@ -429,8 +429,9 @@ def submit_item_post():
         author_id = session.get('id', 'unknown_user')
         trade_method = data.get('trade_method')
 
-        # 3. Firebase에 저장 (새로 추가된 DB 함수 호출)
-        DB.insert_item(key_name, data, img_path, author_id, trade_method)
+        # 3. Firebase에 저장 (생성 시각을 포함하여 DB에 저장)
+        created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        DB.insert_item(key_name, data, img_path, author_id, trade_method, created_at)
 
         # 4. 성공 페이지 반환
         return f"""
@@ -477,7 +478,16 @@ def product_detail(name):
     data = DB.get_item_byname(str(name))
     
     if data:
-        return render_template('product-detail.html', name=name, data=data)
+        seller_info = None
+        try:
+            author_id = data.get('author')
+            if author_id:
+                seller_info = DB.get_user_info(author_id) or {}
+        except Exception:
+            seller_info = {}
+
+        # 템플릿에 data와 seller_info 전달
+        return render_template('product-detail.html', name=name, data=data, seller_info=seller_info)
     else:
         return "상품을 찾을 수 없습니다.", 404
 
@@ -543,7 +553,7 @@ def toggle_like_api():
     if not success:
         return jsonify({"success": False, "message": "좋아요 처리에 실패했습니다."}), 500
 
-    msg = "좋아요 완료!" if liked else "안좋아요 완료!"
+    msg = "찜에 추가되었습니다" if liked else "찜에서 제거되었습니다."
     return jsonify({"success": True, "liked": liked, "message": msg})
 
 # ----------------------------------------------------------------------

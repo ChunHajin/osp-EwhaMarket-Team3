@@ -150,7 +150,7 @@ class DBhandler:
         return None
 
     # 상품 정보 삽입 함수
-    def insert_item(self, name, data, img_path, author_id, trade_method):
+    def insert_item(self, name, data, img_path, author_id, trade_method, created_at):
         item_info = {
             "title": data.get("title"),
             "price": data.get("price"),
@@ -160,7 +160,8 @@ class DBhandler:
             "author": author_id,
             "img_path": img_path,
             "category": data.get("category"),
-            "trade_method": data.get("trade_method")
+            "trade_method": data.get("trade_method"),
+            "created_at": created_at
         }
         self.db.child("item").child(name).set(item_info)
         print("✅ Firebase Save Success:", item_info)
