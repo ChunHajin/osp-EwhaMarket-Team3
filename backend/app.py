@@ -469,14 +469,30 @@ def product_list():
 
     # 현재 페이지에 해당하는 아이템 슬라이스
     datas_for_page = dict(list(filtered_items.items())[start_idx:end_idx])
-
+    # 각 아이템별로 서버에서 찜 상태와 개수를 미리 계산하여 템플릿으로 전달
+    like_info = {}
+    current_user = session.get('id')
+    for item_key in datas_for_page.keys():
+        try:
+            count = DB.get_like_count(item_key)
+            liked = DB.get_like_status(item_key, current_user) if current_user else False
+        except Exception:
+            count = 0
+            liked = False
+        like_info[item_key] = { 'liked': bool(liked), 'count': int(count) }
+    # DEBUG: 서버에서 생성한 like_info를 로그로 출력합니다 (개발용)
+    try:
+        print("[DEBUG] like_info:", like_info)
+    except Exception:
+        pass
     return render_template(
         "product-list.html",
         datas=datas_for_page.items(),
         total=item_counts,
         page=page,
         page_count=page_count,
-        selected_category=selected_category
+        selected_category=selected_category,
+        like_info=like_info
     )
 
 @app.route('/product-detail.html')
@@ -497,8 +513,13 @@ def product_detail(name):
         except Exception:
             seller_info = {}
 
-        # 템플릿에 data와 seller_info 전달
-        return render_template('product-detail.html', name=name, data=data, seller_info=seller_info)
+        current_user = session.get('id')
+        try:
+            liked = DB.get_like_status(name, current_user) if current_user else False
+        except Exception:
+            liked = False
+
+        return render_template('product-detail.html', name=name, data=data, seller_info=seller_info, liked=bool(liked))
     else:
         return "상품을 찾을 수 없습니다.", 404
 
@@ -542,7 +563,8 @@ def like_status():
         return jsonify({"success": True, "liked": False, "logged_in": False})
 
     liked = DB.get_like_status(item_name, user_id)
-    return jsonify({"success": True, "liked": liked, "logged_in": True})
+    like_count = DB.get_like_count(item_name)
+    return jsonify({"success": True, "liked": liked, "logged_in": True, "like_count": like_count})
 
 
 @app.route("/api/toggle_like", methods=['POST'])
@@ -565,7 +587,12 @@ def toggle_like_api():
         return jsonify({"success": False, "message": "좋아요 처리에 실패했습니다."}), 500
 
     msg = "찜에 추가되었습니다" if liked else "찜에서 제거되었습니다."
-    return jsonify({"success": True, "liked": liked, "message": msg})
+    try:
+        latest_count = DB.get_like_count(item_name)
+    except Exception:
+        latest_count = 0
+
+    return jsonify({"success": True, "liked": liked, "like_count": int(latest_count), "message": msg})
 
 # ----------------------------------------------------------------------
 

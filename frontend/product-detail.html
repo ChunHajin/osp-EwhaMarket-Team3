@@ -48,12 +48,17 @@
             </button>
             <button
               type="button"
-              class="btn-icon-like"
+              class="btn-icon-like {% if liked %}liked{% endif %}"
               id="likeButton"
               data-item-name="{{ name }}"
+              aria-pressed="{{ 'true' if liked else 'false' }}"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <use href="#icon-heart"></use>
+                {% if liked is true %}
+                  <use href="#icon-heart-filled"></use>
+                {% else %}
+                  <use href="#icon-heart"></use>
+                {% endif %}
               </svg>
             </button>
           </div>
@@ -97,12 +102,15 @@ const likeButton = document.getElementById('likeButton');
 const USER_ID = "{{ user_id or '' }}";  // 로그인 정보 (inject_user 사용)
 
 function updateHeart(liked) {
-    if (!likeButton) return;
-    if (liked) {
-        likeButton.classList.add("liked");
-    } else {
-        likeButton.classList.remove("liked");
-    }
+  if (!likeButton) return;
+  const useEl = likeButton.querySelector('use');
+  if (liked) {
+    likeButton.classList.add("liked");
+  if (useEl) useEl.setAttribute('href', '#icon-heart-filled');
+  } else {
+    likeButton.classList.remove("liked");
+  if (useEl) useEl.setAttribute('href', '#icon-heart');
+}
 }
 
 async function fetchLikeStatus(itemName) {
@@ -144,22 +152,16 @@ async function toggleLike(itemName) {
         alert("서버 통신 중 오류가 발생했습니다.");
     }
 }
-
 document.addEventListener("DOMContentLoaded", () => {
-    if (!likeButton) return;
+  if (!likeButton) return;
 
-    const itemName = likeButton.dataset.itemName;
+  const itemName = likeButton.dataset.itemName;
 
-    // 페이지 로딩 시 좋아요 상태 조회
-    if (itemName) {
-        fetchLikeStatus(itemName);
-    }
-
-    // 누르면 좋아요 토글
-    likeButton.addEventListener("click", () => {
-        if (!itemName) return;
-        toggleLike(itemName);
-    });
+  // 누르면 좋아요 토글
+  likeButton.addEventListener("click", () => {
+    if (!itemName) return;
+    toggleLike(itemName);
+  });
 });
 
 </script>

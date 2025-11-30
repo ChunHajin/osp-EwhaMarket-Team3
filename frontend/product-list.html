@@ -57,11 +57,13 @@
 
                 <div class="product-meta-row">
                   <p class="product-price">{{ value.price | default(0) | int }}원</p>
-                  <div class="like-info">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="like-icon">
-                      <use href="#icon-heart"></use>
+                  {% set li = like_info.get(key, {'liked': False, 'count': 0}) %}
+                  <div class="like-info {% if li.liked is true %}liked{% endif %}" data-item-name="{{ key }}">
+                    <svg viewBox="0 0 24 24" class="like-icon" fill="none" stroke="currentColor">
+                      <use href="{% if li.liked is true %}#icon-heart-filled{% else %}#icon-heart{% endif %}"></use>
                     </svg>
-                    <span>0</span> </div>
+                    <span class="like-count">{{ li.count }}</span>
+                  </div>
                 </div>
               </div>
             </div>

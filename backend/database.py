@@ -299,6 +299,21 @@ class DBhandler:
             print(f"get_like_status Error: {e}")
             return False
 
+    def get_like_count(self, item_name):
+        """
+        특정 상품의 좋아요 개수를 반환합니다.
+        """
+        try:
+            res = self.db.child("likes").child(item_name).get()
+            if not res.val():
+                return 0
+            if isinstance(res.val(), dict):
+                return len(res.val())
+            return 0
+        except Exception as e:
+            print(f"get_like_count Error: {e}")
+            return 0
+
     def set_like_status(self, item_name, user_id, liked):
         """
         liked=True  → set(True)
