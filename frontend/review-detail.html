@@ -47,10 +47,10 @@
                             <p class="review-text">
                                 {{ review_data.content | nl2br }}
                             </p>
-
-                            <span class="review-time">{{ format_time_ago(review_data.created_at) if review_data.created_at }}</span>
+  
                         </div>
                     </div>
+                    <span class="review-time">{{ format_time_ago(review_data.created_at) if review_data.created_at }}</span>
                 </div>
             </div>
             

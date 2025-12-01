@@ -43,6 +43,7 @@
     max-width: 768px;
     margin: 0 auto;
     padding: 1.5rem;
+    position: relative;
 }
 
 .review-content-body {
@@ -56,6 +57,8 @@
     border-radius: 0.5rem;
     overflow: hidden;
     box-shadow: var(--shadow-md);
+    width: 200px; 
+    max-height: none;
 }
 
 .review-photo {
@@ -66,8 +69,7 @@
 
 /* 3-2. 리뷰 텍스트 및 별점 (우측) */
 .review-text-wrapper {
-    position: relative;
-    padding-bottom: 2rem;
+    padding-bottom: 0;
     padding-top: 1.5rem;
     flex-grow: 1;
     min-width: 0;
@@ -115,8 +117,8 @@
 /* 작성 시간 */
 .review-time {
     position: absolute;
-    bottom: 0;
-    right: 0;
+    bottom: 1.5rem;
+    right: 1.5rem;
     font-size: 0.875rem;
     color: var(--gray-400);
     font-weight: 500;
