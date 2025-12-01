@@ -111,13 +111,27 @@ def view_review():
     per_page=8
     per_row=2
 
+    sort_option = request.args.get("sort","latest") #정렬옵션 읽기
+
     data=DB.get_reviews()
     if not data:
         data={}
 
+    data_list = list(data.items()) #딕셔너리->리스트변환
+    #정렬
+    if sort_option == "latest":
+        data_list.sort(
+            key=lambda x: x[1].get("created_at",""),
+            reverse=True
+        )
+    elif sort_option == "rating":
+        data_list.sort(
+            key=lambda x: float(x[1].get("rate",0)),
+            reverse=True
+        )
     item_counts=len(data)
  
-    data_list=list(data.items()) #딕셔너리->리스트변환
+    
     page_count=int((item_counts/per_page)+1) #전체페이지수 계산
 
     
@@ -136,7 +150,8 @@ def view_review():
         row1=row2.items(),
         page=page,
         page_count=page_count,
-        total=item_counts
+        total=item_counts,
+        sort_option=sort_option
     )
 
 
@@ -429,8 +444,9 @@ def submit_item_post():
         author_id = session.get('id', 'unknown_user')
         trade_method = data.get('trade_method')
 
-        # 3. Firebase에 저장 (새로 추가된 DB 함수 호출)
-        DB.insert_item(key_name, data, img_path, author_id, trade_method)
+        # 3. Firebase에 저장 (생성 시각을 포함하여 DB에 저장)
+        created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        DB.insert_item(key_name, data, img_path, author_id, trade_method, created_at)
 
         # 4. 성공 페이지 반환
         return f"""
@@ -446,25 +462,52 @@ def submit_item_post():
 
 @app.route('/product-list.html')
 def product_list():
-    page = request.args.get("page", 1, type=int) 
-    per_page = 4 
+    # 페이지네이션
+    page = request.args.get("page", 1, type=int)
+    per_page = 4
     start_idx = per_page * (page - 1)
     end_idx = per_page * page
-    data = DB.get_items() 
-    
-    if not data:
-        data = {}
 
-    item_counts = len(data)
-    page_count = (item_counts + per_page - 1) // per_page
-    datas_for_page = dict(list(data.items())[start_idx:end_idx])
+    # 카테고리 필터
+    selected_category = request.args.get('category', '전체')
 
+    all_items = DB.get_items() or {}
+
+    # 특정 카테고리가 선택된 경우 (전체가 아닌 경우) 필터링
+    if selected_category and selected_category != '전체':
+        filtered_items = {k: v for k, v in all_items.items() if (v.get('category') == selected_category)}
+    else:
+        filtered_items = all_items
+
+    item_counts = len(filtered_items)
+    page_count = (item_counts + per_page - 1) // per_page if item_counts > 0 else 1
+
+    # 현재 페이지에 해당하는 아이템 슬라이스
+    datas_for_page = dict(list(filtered_items.items())[start_idx:end_idx])
+    # 각 아이템별로 서버에서 찜 상태와 개수를 미리 계산하여 템플릿으로 전달
+    like_info = {}
+    current_user = session.get('id')
+    for item_key in datas_for_page.keys():
+        try:
+            count = DB.get_like_count(item_key)
+            liked = DB.get_like_status(item_key, current_user) if current_user else False
+        except Exception:
+            count = 0
+            liked = False
+        like_info[item_key] = { 'liked': bool(liked), 'count': int(count) }
+    # DEBUG: 서버에서 생성한 like_info를 로그로 출력합니다 (개발용)
+    try:
+        print("[DEBUG] like_info:", like_info)
+    except Exception:
+        pass
     return render_template(
-        "product-list.html", 
+        "product-list.html",
         datas=datas_for_page.items(),
         total=item_counts,
         page=page,
-        page_count=page_count 
+        page_count=page_count,
+        selected_category=selected_category,
+        like_info=like_info
     )
 
 @app.route('/product-detail.html')
@@ -477,7 +520,21 @@ def product_detail(name):
     data = DB.get_item_byname(str(name))
     
     if data:
-        return render_template('product-detail.html', name=name, data=data)
+        seller_info = None
+        try:
+            author_id = data.get('author')
+            if author_id:
+                seller_info = DB.get_user_info(author_id) or {}
+        except Exception:
+            seller_info = {}
+
+        current_user = session.get('id')
+        try:
+            liked = DB.get_like_status(name, current_user) if current_user else False
+        except Exception:
+            liked = False
+
+        return render_template('product-detail.html', name=name, data=data, seller_info=seller_info, liked=bool(liked))
     else:
         return "상품을 찾을 수 없습니다.", 404
 
@@ -521,7 +578,8 @@ def like_status():
         return jsonify({"success": True, "liked": False, "logged_in": False})
 
     liked = DB.get_like_status(item_name, user_id)
-    return jsonify({"success": True, "liked": liked, "logged_in": True})
+    like_count = DB.get_like_count(item_name)
+    return jsonify({"success": True, "liked": liked, "logged_in": True, "like_count": like_count})
 
 
 @app.route("/api/toggle_like", methods=['POST'])
@@ -543,8 +601,13 @@ def toggle_like_api():
     if not success:
         return jsonify({"success": False, "message": "좋아요 처리에 실패했습니다."}), 500
 
-    msg = "좋아요 완료!" if liked else "안좋아요 완료!"
-    return jsonify({"success": True, "liked": liked, "message": msg})
+    msg = "찜에 추가되었습니다" if liked else "찜에서 제거되었습니다."
+    try:
+        latest_count = DB.get_like_count(item_name)
+    except Exception:
+        latest_count = 0
+
+    return jsonify({"success": True, "liked": liked, "like_count": int(latest_count), "message": msg})
 
 # ----------------------------------------------------------------------
 

@@ -104,6 +104,7 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
+  min-height: 38rem; /* 빈 상태여도 페이징 위치 유지용 최소 높이 */
 }
 
 /* 거래완료 상태 스타일 */
@@ -139,7 +140,9 @@
 /* 반응형 */
 @media (min-width: 768px) {
     .product-grid { grid-template-columns: repeat(3, 1fr); }
+    .product-grid { min-height: 18rem; }
 }
 @media (min-width: 1024px) {
     .product-grid { grid-template-columns: repeat(4, 1fr); }
+    .product-grid { min-height: 24rem; }
 }
