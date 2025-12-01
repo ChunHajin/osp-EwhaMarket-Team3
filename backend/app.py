@@ -111,13 +111,27 @@ def view_review():
     per_page=8
     per_row=2
 
+    sort_option = request.args.get("sort","latest") #정렬옵션 읽기
+
     data=DB.get_reviews()
     if not data:
         data={}
 
+    data_list = list(data.items()) #딕셔너리->리스트변환
+    #정렬
+    if sort_option == "latest":
+        data_list.sort(
+            key=lambda x: x[1].get("created_at",""),
+            reverse=True
+        )
+    elif sort_option == "rating":
+        data_list.sort(
+            key=lambda x: float(x[1].get("rate",0)),
+            reverse=True
+        )
     item_counts=len(data)
  
-    data_list=list(data.items()) #딕셔너리->리스트변환
+    
     page_count=int((item_counts/per_page)+1) #전체페이지수 계산
 
     
@@ -136,7 +150,8 @@ def view_review():
         row1=row2.items(),
         page=page,
         page_count=page_count,
-        total=item_counts
+        total=item_counts,
+        sort_option=sort_option
     )
 
 

@@ -3,7 +3,7 @@
 {% block title %}리뷰 목록 | 이화마켓{% endblock %}
 
 {% block styles %}
-    <link rel="stylesheet" href="css/review.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/review.css') }}">
 {% endblock %}
 
 {% block section %}
@@ -12,11 +12,17 @@
       <h2 class="page-title">상품 후기 / 전체 조회</h2>
       <p class="review-count">총 <strong>{{total}}개</strong> 리뷰</p>
 
-      <!-- 필터 버튼 -->
-      <div class="filter-buttons">
-        <button class="btn-pill btn-pill-active">최신순</button>
-        <button class="btn-pill btn-pill-inactive">평점순</button>
-      </div>
+      <!-- 정렬버튼 -->
+       <div class="filter-buttons">
+          <a href="{{ url_for('view_review' ,sort='latest') }}"
+           class="btn-pill {% if sort_option == 'latest' %}btn-pill-active{% else %}btn-pill-inactive{% endif %}">
+           최신순
+           </a>
+          <a href="{{ url_for('view_review', sort='rating') }}"
+           class="btn-pill {% if sort_option == 'rating' %}btn-pill-active{% else %}btn-pill-inactive{% endif %}">
+           평점순
+          </a>
+       </div>
 
       <!-- 리뷰 카드 목록 -->
       <div class="review-grid">
@@ -62,9 +68,9 @@
         <ul class="pagination-list">
           {% for i in range(page_count) %}
             {% if i == page %}
-              <li><a href="{{ url_for('view_review',page=i) }}" class="active">{{ i+1 }}</a></li>
+              <li><a href="{{ url_for('view_review',page=i, sort=sort_option) }}" class="active">{{ i+1 }}</a></li>
             {% else %}
-              <li><a href="{{ url_for('view_review',page=i) }}">{{ i+1 }}</a></li>
+              <li><a href="{{ url_for('view_review',page=i, sort=sort_option) }}">{{ i+1 }}</a></li>
             {% endif %}
           {% endfor %}
         </ul>
