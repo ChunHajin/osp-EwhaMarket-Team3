@@ -137,38 +137,3 @@
 .pagination-list li a:hover {
   background-color: var(--gray-50);
 }
-
-.btn-pill {
-  padding: 8px 20px;
-  border-radius: 999px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease-in-out;
-  text-decoration: none;
-
-  background-color: white !important;
-  border: 1.8px solid #D1D5DB;
-  color: #4B5563;
-}
-.btn-pill-active {
-  background-color: #00462A !important; 
-  border-color: #00462A !important;
-  color: white !important;
-}
-
-
-.btn-pill-inactive {
-  background-color: white !important;
-  border-color: #D1D5DB !important;
-  color: #6B7280 !important;
-}
-
-
-.btn-pill:hover {
-  background-color: #F3F4F6;
-  border-color: #9CA3AF;
-}
