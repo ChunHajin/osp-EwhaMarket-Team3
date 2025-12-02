@@ -34,7 +34,7 @@
 
           <div class="product-description-container">
             <h2 class="product-description-title">상품설명</h2>
-            <p class="product-description-text">{{ data.desc | default('설명 없음') }}</p>
+            <p class="product-description-text">{{ data.desc | default('설명 없음') | nl2br }}</p>
           </div>
 
           <div class="product-info-grid">

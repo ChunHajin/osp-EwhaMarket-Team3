@@ -62,7 +62,7 @@
   height: 32px;
   border-radius: 50%;
   background-color: var(--gray-200);
-  overflow: hidden;
+  overflow: hidden; 
 }
 .avatar-img {
   width: 100%;
@@ -71,7 +71,6 @@
   border-radius: 50%;
   display: block;
 }
-
 .user-meta {
   display: flex;
   flex-direction: column;

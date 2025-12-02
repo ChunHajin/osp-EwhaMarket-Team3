@@ -2,6 +2,7 @@ import pyrebase
 import json
 import hashlib
 import os
+from datetime import datetime
 
 class DBhandler:
     def __init__(self):
@@ -202,19 +203,21 @@ class DBhandler:
         :return: (bool) 업데이트 성공 여부
         """
         existing_data = self.db.child("item").child(original_key).get().val()
-        
-        final_img_path = img_path if img_path else existing_data.get("img_path", "")
-        
+
+        final_img_path = img_path if img_path else (existing_data.get("img_path", "") if existing_data else "")
+        existing_created_at = existing_data.get("created_at") if existing_data and existing_data.get("created_at") else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
         item_info = {
             "title": new_data.get("title"),
             "price": new_data.get("price"),
             "region": new_data.get("region"),
             "status": new_data.get("status"),
             "desc": new_data.get("desc"),
-            "author": author_id, 
+            "author": author_id,
             "img_path": final_img_path,
             "category": new_data.get("category"),
-            "trade_method": new_data.get("trade_method")
+            "trade_method": new_data.get("trade_method"),
+            "created_at": existing_created_at
         }
         
         if new_key and new_key != original_key:
