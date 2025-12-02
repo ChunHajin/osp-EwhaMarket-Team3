@@ -118,6 +118,16 @@ def view_review():
         data={}
 
     data_list = list(data.items()) #딕셔너리->리스트변환
+    for _, review in data_list:
+        writer_id = review.get("writer_id")  # 리뷰 작성자
+        if writer_id:
+            user_info = DB.get_user_info(writer_id)
+            if user_info:
+                review["profile_img"] = user_info.get("profile_img", "")
+            else:
+                review["profile_img"] = ""
+        else:
+            review["profile_img"] = ""
     #정렬
     if sort_option == "latest":
         data_list.sort(

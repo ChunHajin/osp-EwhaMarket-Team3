@@ -38,7 +38,13 @@
              {% endif %}
           </div>
           <div class="review-user">
-            <div class="user-avatar"></div>
+             <div class="user-avatar">
+                  {% if value.profile_img %}
+                      <img src="{{ url_for('static', filename=value.profile_img) }}" class="avatar-img">
+                  {% else %}
+                      <img src="{{ url_for('static', filename='uploads/profile/default.png') }}" class="avatar-img">
+                  {% endif %}
+            </div>
             <div class="user-meta">
               <p class="username">{{ value.writer_id | default('') }}</p>
               <p class="date">{{ format_time_ago(value.created_at) if value.created_at else '' }}</p>
