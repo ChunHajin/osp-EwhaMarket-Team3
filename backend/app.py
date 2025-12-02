@@ -162,41 +162,57 @@ def mypage():
         return redirect(url_for('login_page'))
     
     user_id = session['id']
-    
-    # 사용자 정보 가져오기
-    user_info = DB.get_user_info(user_id)
-    if not user_info:
-        user_info = {'profile_img': ''}
-    elif not user_info.get('profile_img'):
-        user_info['profile_img'] = ''
-        
-    # 전체 상품 가져오기
-    all_items = DB.get_items()
-    if not all_items:
-        all_items = {}
-    
-    # 내 판매 상품 (작성자가 나인 경우)
+
+    sales_page = request.args.get("page_sales", 1, type=int)
+    purchase_page = request.args.get("page_purchases", 1, type=int)
+    per_page = 3
+
+    user_info = DB.get_user_info(user_id) or {'profile_img': ''}
+    all_items = DB.get_items() or {}
+
     my_sales = {k: v for k, v in all_items.items() if v.get('author') == user_id}
-    
-    # 내 구매 상품 (구매자가 나인 경우)
     my_purchases = {k: v for k, v in all_items.items() if v.get('buyer') == user_id}
-    
-     # 각 구매한 상품에 대해 리뷰 존재 여부 확인
-    purchase_review_status = {}
-    for item_key in my_purchases.keys():
-        purchase_review_status[item_key] = DB.check_review_exists(item_key, user_id)
+
+    sales_list = list(my_sales.items())
+    sales_total = len(sales_list)
+    sales_page_count = max((sales_total + per_page - 1) // per_page, 1)
+
+    sales_start = (sales_page - 1) * per_page
+    sales_end = sales_page * per_page
+    sales_items = sales_list[sales_start:sales_end]
+
+    purchases_list = list(my_purchases.items())
+    purchase_total = len(purchases_list)
+    purchase_page_count = max((purchase_total + per_page - 1) // per_page, 1)
+
+    purchase_start = (purchase_page - 1) * per_page
+    purchase_end = purchase_page * per_page
+    purchase_items = purchases_list[purchase_start:purchase_end]
+
+    purchase_review_status = {
+        k: DB.check_review_exists(k, user_id) for k, _ in my_purchases.items()
+    }
 
     available_count = sum(1 for item in my_sales.values() if item.get('status') != '거래 완료')
     sold_count = sum(1 for item in my_sales.values() if item.get('status') == '거래 완료')
 
-    return render_template('mypage.html',
-                           user_id=user_id,
-                           user_info=user_info,
-                           my_sales=my_sales.items(),
-                           my_purchases=my_purchases.items(),
-                           purchase_review_status=purchase_review_status,
-                           available_count=available_count,
-                           sold_count=sold_count)
+    return render_template(
+        'mypage.html',
+        user_id=user_id,
+        user_info=user_info,
+
+        my_sales=sales_items,
+        my_purchases=purchase_items,
+
+        sales_page=sales_page,
+        sales_page_count=sales_page_count,
+        purchase_page=purchase_page,
+        purchase_page_count=purchase_page_count,
+
+        purchase_review_status=purchase_review_status,
+        available_count=available_count,
+        sold_count=sold_count
+    )
 
 
 @app.route("/api/upload_profile_img", methods=['POST'])
