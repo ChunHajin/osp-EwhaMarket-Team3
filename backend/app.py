@@ -118,6 +118,17 @@ def view_review():
         data={}
 
     data_list = list(data.items()) #딕셔너리->리스트변환
+
+    for _, review in data_list:
+        writer_id = review.get("writer_id")
+        if writer_id:
+            user_info = DB.get_user_info(writer_id)
+            if user_info:
+                review["profile_img"] = user_info.get("profile_img","")
+            else:
+                review["profile_img"]=""
+        else:
+            review["profile_img"]=""
     #정렬
     if sort_option == "latest":
         data_list.sort(
@@ -567,8 +578,15 @@ def purchase_item_api():
     data = request.get_json()
     item_name = data.get('item_name')
     buyer_id = session['id']
-    
-    # 2. DB 업데이트 요청
+    # 2. 본인 상품 구매 금지 (작성자 자신은 구매할 수 없음)
+    try:
+        item = DB.get_item_byname(item_name)
+        if item and item.get('author') == buyer_id:
+            return jsonify({"success": False, "message": "자신이 등록한 상품은 구매할 수 없습니다."}), 400
+    except Exception:
+        pass
+
+    # 3. DB 업데이트 요청
     success, message = DB.purchase_item(item_name, buyer_id)
     if success:
         return jsonify({"success": True, "message": message})
@@ -611,6 +629,14 @@ def toggle_like_api():
 
     if not item_name:
         return jsonify({"success": False, "message": "상품명이 필요합니다."}), 400
+
+    # 본인 상품에 대한 찜 금지
+    try:
+        item = DB.get_item_byname(item_name)
+        if item and item.get('author') == session['id']:
+            return jsonify({"success": False, "message": "자신이 등록한 상품은 찜할 수 없습니다."}), 400
+    except Exception:
+        pass
 
     success, liked = DB.toggle_like(item_name, session['id'])
 
