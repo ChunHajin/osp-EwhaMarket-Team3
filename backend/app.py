@@ -38,7 +38,42 @@ def product_create():
 
 @app.route('/product-wishlist.html')
 def product_wishlist():
-    return render_template('product-wishlist.html')
+    # 1. require login
+    if 'id' not in session:
+        return redirect(url_for('login_page'))
+
+    user_id = session['id']
+
+    # 2. pagination info
+    page = request.args.get("page", 1, type=int)
+    per_page = 4  # number of liked items per page
+
+    # 3. get all items and this user's liked item keys
+    all_items = DB.get_items() or {}
+    liked_keys = DB.get_liked_items_by_user(user_id)  # uses the function we just added
+
+    # 4. build list of (key, item_dict) only for liked items
+    liked_items = []
+    for key in liked_keys:
+        if key in all_items:
+            liked_items.append((key, all_items[key]))
+
+    total = len(liked_items)
+    page_count = max((total + per_page - 1) // per_page, 1)
+
+    # 5. slice for current page
+    start_idx = per_page * (page - 1)
+    end_idx = per_page * page
+    page_items = liked_items[start_idx:end_idx]
+
+    # 6. render template with data
+    return render_template(
+        'product-wishlist.html',
+        datas=page_items,     # list of (item_key, item_data)
+        page=page,
+        page_count=page_count,
+        total=total
+    )
 
 @app.route('/review-write.html')
 def review_write():

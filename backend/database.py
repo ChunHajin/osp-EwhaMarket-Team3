@@ -340,3 +340,27 @@ class DBhandler:
         new_status = not current
         success = self.set_like_status(item_name, user_id, new_status)
         return success, new_status
+
+    def get_liked_items_by_user(self, user_id):
+        """
+        Return a list of item names that this user has liked.
+        We assume this Firebase structure:
+
+        likes
+          └─ item_name
+               └─ user_id: True
+        """
+        liked_items = []
+        try:
+            snapshot = self.db.child("likes").get()
+            if not snapshot.val():
+                return []
+
+            for item_node in snapshot.each():
+                item_name = item_node.key()          # e.g. "간이 탁자"
+                item_likes = item_node.val()         # dict of { user_id: True, ... }
+                if isinstance(item_likes, dict) and user_id in item_likes:
+                    liked_items.append(item_name)
+        except Exception as e:
+            print(f"get_liked_items_by_user Error: {e}")
+        return liked_items
