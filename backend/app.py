@@ -18,9 +18,9 @@ app = Flask(__name__,
 
 # ==============================================================================
 # 1. 애플리케이션 설정 (Configuration)
-# 환경 변수를 통한 설정으로 오픈소스 배포 용이성 증대
 # ==============================================================================
 
+# 환경 변수를 통한 설정으로 오픈소스 배포 용이성 증대
 app.config["SECRET_KEY"] = os.getenv("FLASK_SECRET", "EwhaMarket_SecretKey")
 app.config["UPLOAD_FOLDER"] = os.path.join(app.root_path, "..", "frontend", "uploads")
 app.config["MAX_CONTENT_LENGTH"] = int(os.getenv("MAX_CONTENT_LENGTH", 5 * 1024 * 1024))
@@ -31,12 +31,12 @@ app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=int(os.getenv("SESSION
 logging.basicConfig(level=logging.INFO)
 app.logger.setLevel(logging.INFO)
 
-# 모듈 요약: 이 파일은 Flask 라우트(인증, 상품, 리뷰, 마이페이지)를 정의합니다.
+# 모듈 요약: 이 파일은 Flask 라우트를 정의합니다.
 # 각 라우트는 Firebase 연동을 위해 database.DBhandler를 사용하며
 # 파일 업로드와 세션 관리를 담당합니다.
 
 # ==============================================================================
-# 2. 데이터베이스 핸들러 (Lazy Loading for Testability)
+# 2. 데이터베이스 핸들러 (Lazy Loading & Testability)
 # ==============================================================================
 
 DB: Optional[DBhandler] = None
@@ -44,16 +44,17 @@ DB: Optional[DBhandler] = None
 def get_db() -> DBhandler:
     """
     DBhandler 인스턴스를 싱글톤 패턴으로 로드하거나 반환합니다.
-    테스트 환경에서 Mocking을 위해 사용됩니다.
+    데이터베이스 연결을 요청 시에만 수행하여 효율적이며, 테스트 용이성을 높입니다.
     :return: (DBhandler) 데이터베이스 핸들러 인스턴스.
     """
-    # 구현: DB 핸들러를 지연 생성(lazy load)
-    # 구현: 테스트/모킹을 위해 전역 인스턴스를 재사용
     global DB
+    # DB 핸들러를 지연 생성(lazy load)
     if DB is None:
         DB = DBhandler()
+    # 테스트/재사용을 위해 전역 인스턴스를 반환
     return DB
 
+# 애플리케이션 시작 시 DB 핸들러를 최초로 초기화
 if DB is None:
     DB = get_db()
 
@@ -139,7 +140,7 @@ def register_user():
     data = request.form
     pw = data.get('pw')
 
-    # 구현: 비밀번호를 SHA-256로 해시화 (간단 해시; 프로덕션에서는 솔트+강한 해시 권장)
+    # 구현: 비밀번호를 SHA-256로 해시화
     pw_hash = hashlib.sha256(pw.encode('utf-8')).hexdigest()
 
     # 구현: DB에 사용자 정보 저장 요청 (user_duplicate_check 내부 호출로 중복 확인)
@@ -231,7 +232,7 @@ def submit_user_edit():
     if not get_db().find_user(user_id, current_pw_hash):
         return jsonify({"success": False, "message": "현재 비밀번호가 일치하지 않습니다."}), 401
 
-    # 구현: (선택) 새 비밀번호 일치 여부 확인 및 해시화
+    # 구현: 새 비밀번호 일치 여부 확인 및 해시화
     new_pw = data.get('new_pw')
     new_pw_confirm = data.get('new_pw_confirm')
     pw_to_update = current_pw_hash
@@ -269,7 +270,7 @@ def upload_profile_img():
         return jsonify({"success": False, "message": "파일이 없습니다."}), 400
 
     try:
-        # 구현: 허용 확장자 검사 (간단 화이트리스트)
+        # 구현: 허용 확장자 검사
         ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp", "avif"}
         ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
         if ext not in ALLOWED_EXTENSIONS:
@@ -707,7 +708,7 @@ def submit_review_post():
 
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        # 구현: 리뷰 이미지가 있으면 저장 (선택 사항)
+        # 구현: 리뷰 이미지가 있으면 저장
         image_file = request.files.get("review-photos")
         img_path = ""
 

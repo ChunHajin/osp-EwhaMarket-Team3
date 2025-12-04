@@ -55,7 +55,7 @@ class DBhandler:
             logger.error("user_duplicate_check called but DB is not initialized")
             return True
 
-        # 구현: 사용자 노드 스냅샷을 가져와 id 중복 여부 검사 (전체 스캔)
+        # 구현: 사용자 노드 스냅샷을 가져와 id 중복 여부 검사
         users = self.db.child("user").get()
 
         if not users or not users.val():
