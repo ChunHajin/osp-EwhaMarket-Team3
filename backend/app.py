@@ -23,13 +23,17 @@ app = Flask(__name__,
 
 app.config["SECRET_KEY"] = os.getenv("FLASK_SECRET", "EwhaMarket_SecretKey")
 app.config["UPLOAD_FOLDER"] = os.path.join(app.root_path, "..", "frontend", "uploads")
-app.config["MAX_CONTENT_LENGTH"] = int(os.getenv("MAX_CONTENT_LENGTH", 5 * 1024 * 1024))  # 기본 5MB
+app.config["MAX_CONTENT_LENGTH"] = int(os.getenv("MAX_CONTENT_LENGTH", 5 * 1024 * 1024))
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SECURE"] = (os.getenv("FLASK_ENV") == "production")
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=int(os.getenv("SESSION_DAYS", 7)))
 
 logging.basicConfig(level=logging.INFO)
 app.logger.setLevel(logging.INFO)
+
+# 모듈 요약: 이 파일은 Flask 라우트(인증, 상품, 리뷰, 마이페이지)를 정의합니다.
+# 각 라우트는 Firebase 연동을 위해 database.DBhandler를 사용하며
+# 파일 업로드와 세션 관리를 담당합니다.
 
 # ==============================================================================
 # 2. 데이터베이스 핸들러 (Lazy Loading for Testability)
@@ -43,6 +47,8 @@ def get_db() -> DBhandler:
     테스트 환경에서 Mocking을 위해 사용됩니다.
     :return: (DBhandler) 데이터베이스 핸들러 인스턴스.
     """
+    # 구현: DB 핸들러를 지연 생성(lazy load)
+    # 구현: 테스트/모킹을 위해 전역 인스턴스를 재사용
     global DB
     if DB is None:
         DB = DBhandler()
@@ -59,8 +65,9 @@ if DB is None:
 def home():
     """
     기본 경로('/')로 접근 시 상품 목록 페이지로 리디렉션합니다.
-    :return: (Redirect) product_list 라우트로 리다이렉션.
+    :return: (Redirect) product_list 라우트로 리디렉션.
     """
+    # 구현: 루트 접근을 상품 목록 페이지로 리디렉션
     return redirect(url_for('product_list'))
 
 @app.route('/signup.html')
@@ -87,14 +94,6 @@ def product_create():
     """
     return render_template('product-create.html')
 
-@app.route('/product-wishlist.html')
-def product_wishlist():
-    """
-    찜 목록 페이지를 렌더링합니다.
-    :return: (HTML) product-wishlist.html
-    """
-    return render_template('product-wishlist.html')
-
 @app.route('/product-detail.html')
 def product_detail_static():
     """
@@ -115,12 +114,14 @@ def check_userid():
     :query_param userid: (str) 확인할 사용자 ID.
     :return: (JSON) 사용 가능 여부. 상태 코드 200 또는 400.
     """
+    # 구현: 쿼리 파라미터에서 userid를 읽음
     userid = request.args.get('userid')
     if not userid:
         return jsonify({"available": False, "message": "아이디를 입력하세요."}), 400
     
     is_available = get_db().user_duplicate_check(userid)
     
+    # 구현: DB에 중복 여부를 질의하고 JSON으로 응답
     if is_available:
         return jsonify({"available": True}), 200
     else:
@@ -134,11 +135,14 @@ def register_user():
     :form_data id, pw, email: (str) 필수 사용자 정보.
     :return: (Redirect) 성공 시 login_page, 실패 시 signup_page로 리디렉션.
     """
+    # 구현: 회원가입 폼에서 전달된 데이터를 읽음
     data = request.form
     pw = data.get('pw')
-    
+
+    # 구현: 비밀번호를 SHA-256로 해시화 (간단 해시; 프로덕션에서는 솔트+강한 해시 권장)
     pw_hash = hashlib.sha256(pw.encode('utf-8')).hexdigest()
-    
+
+    # 구현: DB에 사용자 정보 저장 요청 (user_duplicate_check 내부 호출로 중복 확인)
     success = get_db().insert_user(data, pw_hash)
     
     if success:
@@ -154,14 +158,17 @@ def login_user():
     :form_data id, pw: (str) 사용자 ID와 비밀번호.
     :return: (JSON) 성공 여부. 상태 코드 200, 400 (필수 값 누락), 401 (인증 실패).
     """
+    # 구현: 요청 폼에서 id/pw 추출 및 필수값 검증
     id_ = request.form.get('id')
     pw = request.form.get('pw')
 
     if not id_ or not pw:
         return jsonify({"success": False, "message": "필수 값 누락"}), 400
 
+    # 구현: 비밀번호 해시를 생성하고 DB에서 사용자 인증
     pw_hash = hashlib.sha256(pw.encode('utf-8')).hexdigest()
 
+    # 구현: 인증 성공 시 세션에 사용자 id 저장
     if get_db().find_user(id_, pw_hash):
         session['id'] = id_
         return jsonify({"success": True}), 200
@@ -172,9 +179,11 @@ def login_user():
 def logout():
     """
     사용자 세션을 제거하고 로그아웃 처리 후 상품 목록으로 리디렉션합니다.
-    :return: (Redirect) product_list 라우트로 리다이렉션.
+    :return: (Redirect) product_list 라우트로 리디렉션.
     """
+    # 구현: 세션에서 로그인 정보 제거
     session.pop('id', None)
+    # 구현: 상품 목록 페이지로 리디렉션
     return redirect(url_for('product_list'))
 
 @app.route('/user-edit.html')
@@ -183,9 +192,11 @@ def user_edit_page():
     개인정보 수정 페이지를 렌더링합니다.
     :return: (HTML) user-edit.html 또는 로그인 페이지로 리디렉션 (401), 사용자 정보 없음 (404).
     """
+    # 구현: 로그인 상태 확인
     if 'id' not in session:
         return redirect(url_for('login_page'))
     
+    # 구현: DB에서 사용자 정보 조회 후 템플릿 렌더링
     user_id = session.get('id')
     user_info = get_db().get_user_info(user_id)
 
@@ -203,21 +214,24 @@ def submit_user_edit():
     :form_data current_pw, new_pw(선택), email, phone(선택): 사용자 수정 정보.
     :return: (JSON) 성공 여부. 상태 코드 200, 400, 401, 500.
     """
+    # 구현: 로그인 여부 확인 (세션 존재 여부)
     if 'id' not in session:
         return jsonify({"success": False, "message": "로그인이 필요합니다."}), 401
 
     user_id = session['id']
     data = request.form
-    
+
+    # 구현: 현재 비밀번호 필수 입력 검증
     current_pw = data.get('current_pw')
     if not current_pw:
         return jsonify({"success": False, "message": "현재 비밀번호를 입력해야 개인정보를 수정할 수 있습니다."}), 400
 
+    # 구현: 현재 비밀번호의 해시를 비교하여 사용자 검증
     current_pw_hash = hashlib.sha256(current_pw.encode('utf-8')).hexdigest()
-    
     if not get_db().find_user(user_id, current_pw_hash):
         return jsonify({"success": False, "message": "현재 비밀번호가 일치하지 않습니다."}), 401
 
+    # 구현: (선택) 새 비밀번호 일치 여부 확인 및 해시화
     new_pw = data.get('new_pw')
     new_pw_confirm = data.get('new_pw_confirm')
     pw_to_update = current_pw_hash
@@ -226,7 +240,8 @@ def submit_user_edit():
         if new_pw != new_pw_confirm:
             return jsonify({"success": False, "message": "새 비밀번호와 확인이 일치하지 않습니다."}), 400
         pw_to_update = hashlib.sha256(new_pw.encode('utf-8')).hexdigest()
-    
+
+    # 구현: DB에 변경된 사용자 정보 업데이트 요청
     success = get_db().update_user_info(user_id, pw_to_update, data.get('email'), data.get('phone'))
 
     if success:
@@ -242,29 +257,35 @@ def upload_profile_img():
     :file_data profile_image: 업로드할 이미지 파일.
     :return: (JSON) 성공 여부와 이미지 경로. 상태 코드 200, 400, 401, 500.
     """
+    # 구현: 로그인 확인
     if 'id' not in session:
         return jsonify({"success": False, "message": "로그인이 필요합니다."}), 401
 
     user_id = session['id']
     file = request.files.get('profile_image')
 
+    # 구현: 파일 유무 및 파일명 확인
     if not file or not file.filename:
         return jsonify({"success": False, "message": "파일이 없습니다."}), 400
 
     try:
+        # 구현: 허용 확장자 검사 (간단 화이트리스트)
         ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp", "avif"}
         ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
         if ext not in ALLOWED_EXTENSIONS:
             return jsonify({"success": False, "message": "허용되지 않는 파일 형식입니다."}), 400
 
+        # 구현: 파일명 안전화 및 고유 파일명 생성
         original_filename = secure_filename(file.filename)
         filename = f"{user_id}_{int(datetime.now().timestamp())}_{original_filename}"
-        
+
+        # 구현: 물리적 저장 (uploads/profile 폴더)
         save_dir = os.path.join(app.config['UPLOAD_FOLDER'], "profile")
         os.makedirs(save_dir, exist_ok=True)
         save_path = os.path.join(save_dir, filename)
         file.save(save_path)
 
+        # 구현: DB에 저장할 경로 포맷 생성 및 업데이트 요청
         db_path = f"uploads/profile/{filename}"
 
         if get_db().update_user_profile_img(user_id, db_path):
@@ -289,11 +310,13 @@ def submit_item_post():
     :form_data title, price, category, status, desc, photos: 상품 정보 및 이미지.
     :return: (HTML Response) 성공 메시지 페이지 또는 오류 메시지 (400, 500).
     """
+    # 구현: 작성자(로그인) 확인
     author_id = session.get('id', 'unknown_user')
     if author_id == 'unknown_user':
         return redirect(url_for('login_page'))
         
     try:
+        # 구현: 업로드된 이미지 파일 존재 여부 확인 및 저장
         image_file = request.files.get("photos")
         img_path = ""
         
@@ -303,17 +326,20 @@ def submit_item_post():
             key_name_sanitized = secure_filename(request.form.get("title", "unnamed_item"))
             
             unique_filename = f"{key_name_sanitized}_{int(time.time())}_{original_filename}"
+            
             save_dir = os.path.join(app.config['UPLOAD_FOLDER'])
             os.makedirs(save_dir, exist_ok=True)
             img_path = f"uploads/{unique_filename}"
             image_file.save(os.path.join(save_dir, unique_filename))
 
+        # 구현: 폼 데이터 읽기 및 메타 생성
         data = request.form
         key_name = data.get("title", "unnamed_item")
         trade_method = data.get('trade_method')
 
         created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
+        # 구현: Firebase에 상품 데이터 삽입 요청
         get_db().insert_item(key_name, data, img_path, author_id, trade_method, created_at)
 
         return f"""
@@ -336,11 +362,13 @@ def product_list():
     :query_param category: (str) 선택된 카테고리 (기본값 '전체').
     :return: (HTML) product-list.html
     """
+    # 구현: 페이지/페이징 변수 초기화
     page = request.args.get("page", 1, type=int)
     per_page = 4
     start_idx = per_page * (page - 1)
     end_idx = per_page * page
 
+    # 구현: 카테고리 필터 적용
     selected_category = request.args.get('category', '전체')
 
     all_items = get_db().get_items() or {}
@@ -358,6 +386,8 @@ def product_list():
     like_info = {}
     current_user = session.get('id')
     db_handler = get_db()
+    
+    # 구현: 각 아이템에 대해 좋아요 정보 조회 및 템플릿에 전달
     for item_key in datas_for_page.keys():
         try:
             count = db_handler.get_like_count(item_key)
@@ -385,11 +415,13 @@ def product_detail(name: str):
     :param name: (str) 상품 이름 (Firebase Key).
     :return: (HTML) product-detail.html 또는 404 Not Found.
     """
+    # 구현: 해당 상품 데이터를 DB에서 조회
     db_handler = get_db()
     data = db_handler.get_item_byname(str(name))
     
     if data:
         seller_info = {}
+        # 구현: 판매자 정보 보강 (author 기반 조회)
         try:
             author_id = data.get('author')
             if author_id:
@@ -400,6 +432,7 @@ def product_detail(name: str):
 
         current_user = session.get('id')
         liked = False
+        # 구현: 현재 사용자에 대한 좋아요 상태 조회
         try:
             liked = db_handler.get_like_status(name, current_user) if current_user else False
         except Exception:
@@ -417,6 +450,7 @@ def update_item_page():
     :query_param key: (str) 수정할 상품의 이름 (Firebase Key).
     :return: (HTML) product-update.html 또는 로그인/마이페이지로 리디렉션.
     """
+    # 구현: 로그인 여부 확인
     if 'id' not in session:
         return redirect(url_for('login_page'))
     
@@ -424,6 +458,7 @@ def update_item_page():
     item_key = request.args.get('key')
     item_data = None
     
+    # 구현: 쿼리에서 item_key 읽고 DB에서 아이템 로드, 권한 확인
     if item_key:
         item_data = get_db().get_item_byname(item_key)
         
@@ -446,11 +481,13 @@ def submit_item_update():
     :form_data original_key, title, photos(선택): 수정된 상품 정보.
     :return: (HTML Response) 성공 메시지 페이지 또는 오류 메시지 (400, 500).
     """
+    # 구현: 작성자(로그인) 확인
     author_id = session.get('id', 'unknown_user')
     if author_id == 'unknown_user':
         return redirect(url_for('login_page'))
         
     try:
+        # 구현: 폼 데이터와 원본 키 로드
         data = request.form
         original_key = data.get("original_key")
         key_name = data.get("title", "unnamed_item")
@@ -458,6 +495,7 @@ def submit_item_update():
         if not original_key:
             return make_response("<h3>❌ 오류 발생: 수정할 상품 키가 누락되었습니다.</h3>", 400)
         
+        # 구현: 이미지 파일이 있으면 저장하고 경로 생성
         image_file = request.files.get("photos")
         img_path = ""
         
@@ -467,11 +505,13 @@ def submit_item_update():
             key_name_sanitized = secure_filename(key_name)
             
             unique_filename = f"{key_name_sanitized}_{int(time.time())}_{original_filename}"
+            
             save_dir = os.path.join(app.config['UPLOAD_FOLDER'])
             os.makedirs(save_dir, exist_ok=True)
             img_path = f"uploads/{unique_filename}"
             image_file.save(os.path.join(save_dir, unique_filename))
 
+        # 구현: Firebase 상품 정보 업데이트 요청
         get_db().update_item(original_key, data, img_path, author_id, new_key=key_name)
         
         return f"""
@@ -494,9 +534,11 @@ def delete_item_api(item_name: str):
     :param item_name: (str) 삭제할 상품 이름.
     :return: (JSON) 성공 여부. 상태 코드 200, 401, 500.
     """
+    # 구현: 로그인 확인
     if 'id' not in session:
         return jsonify({"success": False, "message": "로그인이 필요합니다."}), 401
     
+    # 구현: DB에 상품 삭제 요청 및 결과 반환
     if get_db().delete_item(item_name):
         return jsonify({"success": True, "message": "상품이 삭제되었습니다."}), 200
     else:
@@ -511,6 +553,7 @@ def purchase_item_api():
     :json_data item_name: 구매할 상품 이름.
     :return: (JSON) 성공 여부. 상태 코드 200, 400 (본인 상품, 이미 완료), 401 (로그인 필요).
     """
+    # 구현: 로그인 확인
     if 'id' not in session:
         return jsonify({"success": False, "message": "로그인이 필요합니다."}), 401
     
@@ -518,6 +561,7 @@ def purchase_item_api():
     item_name = data.get('item_name')
     buyer_id = session['id']
     
+    # 구현: 요청 JSON에서 item_name 추출 및 본인 구매 방지 검사
     if not item_name:
         return jsonify({"success": False, "message": "상품명이 누락되었습니다."}), 400
 
@@ -530,6 +574,7 @@ def purchase_item_api():
         app.logger.exception("purchase_item_api: DB 조회 중 예외")
         pass
 
+    # 구현: DB의 purchase_item 호출 및 결과 반환
     success, message = db_handler.purchase_item(item_name, buyer_id)
     if success:
         return jsonify({"success": True, "message": message}), 200
@@ -545,6 +590,7 @@ def like_status():
     :query_param item_name: (str) 상품 이름.
     :return: (JSON) 성공 여부, 좋아요 상태(liked), 로그인 상태, 좋아요 수. 상태 코드 200, 400.
     """
+    # 구현: 쿼리 파라미터에서 item_name 추출 및 검증
     item_name = request.args.get("item_name")
     if not item_name:
         return jsonify({"success": False, "message": "상품명이 필요합니다."}), 400
@@ -552,9 +598,11 @@ def like_status():
     user_id = session.get('id')
     db_handler = get_db()
     
+    # 구현: 비로그인 사용자는 logged_in=False로 응답
     if not user_id:
         return jsonify({"success": True, "liked": False, "logged_in": False}), 200
 
+    # 구현: DB에서 좋아요 상태와 개수 조회
     try:
         liked = db_handler.get_like_status(item_name, user_id)
         like_count = db_handler.get_like_count(item_name)
@@ -574,6 +622,7 @@ def toggle_like_api():
     :json_data item_name: (str) 좋아요를 토글할 상품 이름.
     :return: (JSON) 성공 여부, 새 좋아요 상태(liked), 좋아요 수. 상태 코드 200, 400, 401, 500.
     """
+    # 구현: 로그인 확인
     if 'id' not in session:
         return jsonify({"success": False, "message": "로그인이 필요합니다."}), 401
 
@@ -584,6 +633,7 @@ def toggle_like_api():
         return jsonify({"success": False, "message": "상품명이 필요합니다."}), 400
 
     db_handler = get_db()
+    # 구현: 요청에서 item_name 추출 및 본인 상품 찜 금지 검사
     try:
         item = db_handler.get_item_byname(item_name)
         if item and item.get('author') == session['id']:
@@ -592,6 +642,7 @@ def toggle_like_api():
         app.logger.exception("toggle_like_api: DB 조회 중 예외")
         pass
 
+    # 구현: DB toggle_like 호출 및 최신 카운트 조회
     success, liked = db_handler.toggle_like(item_name, session['id'])
 
     if not success:
@@ -618,9 +669,11 @@ def review_write():
     :query_param item_name: (str) 리뷰를 작성할 상품 이름.
     :return: (HTML) review-write.html 또는 로그인 페이지로 리디렉션.
     """
+    # 구현: 쿼리에서 item_name 읽기
     item_name = request.args.get('item_name')
     user_id = session.get('id')
 
+    # 구현: 로그인 확인 및 해당 상품 데이터 로드
     if not user_id:
         return redirect(url_for('login_page'))
     
@@ -642,16 +695,19 @@ def submit_review_post():
     :form_data item_name, reviewTitle, rating, reviewContent, review-photos(선택): 리뷰 정보 및 이미지.
     :return: (Redirect) 리뷰 목록 페이지로 리디렉션 또는 오류 메시지 (500).
     """
+    # 구현: 작성자(로그인) 확인
     writer_id = session.get('id')
     if not writer_id:
         return redirect(url_for('login_page'))
     
     try:
+        # 구현: 폼 데이터 읽기 및 타임스탬프 생성
         data = request.form
         item_name = data.get("item_name")
 
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+        # 구현: 리뷰 이미지가 있으면 저장 (선택 사항)
         image_file = request.files.get("review-photos")
         img_path = ""
 
@@ -665,6 +721,7 @@ def submit_review_post():
             img_path = f"uploads/{filename_key}"
             image_file.save(os.path.join(save_dir, filename_key))
 
+        # 구현: 리뷰 DB에 등록 요청
         get_db().reg_review(item_name, data, img_path, writer_id, current_time)
 
         return redirect(url_for('view_review'))
@@ -680,6 +737,7 @@ def review_detail_by_key(review_key: str):
     :param review_key: (str) 조회할 리뷰의 고유 키 (item_name_writer_id).
     :return: (HTML) review-detail.html 또는 404 Not Found.
     """
+    # 구현: review_key로 DB에서 리뷰 조회 후 템플릿 렌더링
     review_data = get_db().get_review_by_key(review_key)
     if review_data:
         return render_template('review-detail.html', review_data=review_data, review_key=review_key)
@@ -695,6 +753,7 @@ def view_review():
     :query_param sort: (str) 정렬 옵션 ('latest' 또는 'rating').
     :return: (HTML) review.html.
     """
+    # 구현: 정렬 옵션 적용 및 페이지네이션
     page = request.args.get("page", 0, type=int)
     per_page = 8
     sort_option = request.args.get("sort", "latest")
@@ -703,6 +762,7 @@ def view_review():
     data_list = list(data.items())
     db_handler = get_db()
 
+    # 구현: 작성자 프로필 보강 (user_info 조회)
     for _, review in data_list:
         writer_id = review.get("writer_id")
         if writer_id:
@@ -756,6 +816,7 @@ def mypage():
     :query_param page_purchases: (int) 구매 상품 페이지 번호 (기본값 1).
     :return: (HTML) mypage.html 또는 로그인 페이지로 리디렉션.
     """
+    # 구현: 로그인 확인
     if 'id' not in session:
         return redirect(url_for('login_page'))
     
@@ -769,9 +830,11 @@ def mypage():
     user_info = db_handler.get_user_info(user_id) or {'profile_img': ''}
     all_items = db_handler.get_items() or {}
 
+    # 구현: 전체 아이템 조회 후 판매/구매 필터링
     my_sales = {k: v for k, v in all_items.items() if v.get('author') == user_id}
     my_purchases = {k: v for k, v in all_items.items() if v.get('buyer') == user_id}
 
+    # 구현: 각 목록에 페이지네이션 적용 및 통계 계산
     sales_list = list(my_sales.items())
     sales_total = len(sales_list)
     sales_page_count = max((sales_total + per_page - 1) // per_page, 1)
@@ -812,7 +875,56 @@ def mypage():
     )
 
 # ==============================================================================
-# 8. 유틸리티 함수 및 컨텍스트 프로세서
+# 8. 찜 화면 라우팅 (Wishlist)
+# ==============================================================================
+
+@app.route('/product-wishlist.html')
+def product_wishlist():
+    """
+    찜 목록 페이지를 렌더링하고, 현재 사용자가 찜한 상품 목록을 페이지네이션하여 보여줍니다.
+    :return: (HTML) product-wishlist.html 또는 로그인 페이지로 리디렉션.
+    """
+    # 구현: 로그인 필요 여부 확인
+    if 'id' not in session:
+        return redirect(url_for('login_page'))
+
+    user_id = session['id']
+
+    # 구현: 페이지네이션 정보 설정 (현재 페이지, 페이지당 항목 수)
+    page = request.args.get("page", 1, type=int)
+    per_page = 4 
+
+    # 구현: 전체 상품 및 사용자가 찜한 상품 키 목록 조회
+    db_handler = get_db()
+    all_items = db_handler.get_items() or {}
+    liked_keys = db_handler.get_liked_items_by_user(user_id)
+
+    # 구현: 찜한 상품만 필터링하여 리스트 구성
+    liked_items = []
+    for key in liked_keys:
+        if key in all_items:
+            liked_items.append((key, all_items[key]))
+
+    # 구현: 전체 항목 수 및 총 페이지 수 계산
+    total = len(liked_items)
+    page_count = max((total + per_page - 1) // per_page, 1)
+
+    # 구현: 현재 페이지에 해당하는 항목만 슬라이싱
+    start_idx = per_page * (page - 1)
+    end_idx = per_page * page
+    page_items = liked_items[start_idx:end_idx]
+
+    # 구현: 템플릿 렌더링 및 데이터 전달
+    return render_template(
+        'product-wishlist.html',
+        datas=page_items,
+        page=page,
+        page_count=page_count,
+        total=total
+    )
+
+# ==============================================================================
+# 9. 유틸리티 함수 및 컨텍스트 프로세서
 # ==============================================================================
 
 def format_time_ago(timestamp_str: str) -> str:
@@ -821,6 +933,7 @@ def format_time_ago(timestamp_str: str) -> str:
     :param timestamp_str: (str) Firebase에 저장된 시간 문자열.
     :return: (str) 상대적 시간 문자열 또는 원본 문자열.
     """
+    # 구현: 문자열 파싱 후 현재 시간과 차이를 계산하여 상대 시간 반환
     TIME_FORMAT = "%Y-%m-%d %H:%M:%S" 
     try:
         posted_time = datetime.strptime(timestamp_str, TIME_FORMAT)
@@ -858,6 +971,7 @@ def nl2br_filter(s: str) -> Markup:
     :param s: (str) 입력 문자열.
     :return: (Markup) <br> 태그로 치환된 HTML 문자열.
     """
+    # 구현: 입력을 문자열로 캐스팅하고 '\n'을 '<br>'로 치환
     if not isinstance(s, str):
         s = str(s)
     
@@ -870,11 +984,12 @@ def inject_user_and_time() -> Dict[str, Any]:
     모든 템플릿에 현재 로그인된 사용자 ID와 시간 포맷 함수를 주입합니다.
     :return: (dict) 주입할 컨텍스트 변수.
     """
+    # 구현: 템플릿 전역 컨텍스트에 user_id와 시간 포맷 함수 주입
     return dict(user_id=session.get('id'),
                 format_time_ago=format_time_ago)
 
 # ==============================================================================
-# 9. 애플리케이션 실행
+# 10. 애플리케이션 실행
 # ==============================================================================
 
 if __name__ == "__main__":
