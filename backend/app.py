@@ -764,13 +764,17 @@ def view_review():
     db_handler = get_db()
 
     # 구현: 작성자 프로필 보강 (user_info 조회)
+    default_profile = "uploads/profile/default.png"
     for _, review in data_list:
         writer_id = review.get("writer_id")
         if writer_id:
             user_info = db_handler.get_user_info(writer_id)
-            review["profile_img"] = user_info.get("profile_img") if user_info else ""
+            if user_info and user_info.get("profile_img"):
+                review["profile_img"] = user_info.get("profile_img", "")
+            else:
+                review["profile_img"] = default_profile
         else:
-            review["profile_img"] = ""
+            review["profile_img"] = default_profile
 
     def _parse_created(s: str) -> datetime:
         try:
