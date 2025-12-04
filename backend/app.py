@@ -246,7 +246,11 @@ def submit_user_edit():
     success = get_db().update_user_info(user_id, pw_to_update, data.get('email'), data.get('phone'))
 
     if success:
-        return jsonify({"success": True, "message": "개인정보가 성공적으로 수정되었습니다."}), 200
+        return jsonify({
+            "success": True,
+            "message": "개인정보가 성공적으로 수정되었습니다.",
+            "redirect": url_for('mypage') 
+        })    
     else:
         return jsonify({"success": False, "message": "DB 업데이트에 실패했습니다."}), 500
 

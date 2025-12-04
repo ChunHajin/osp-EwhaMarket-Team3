@@ -82,11 +82,7 @@
 
                 if (result.success) {
                     alert(result.message);
-                    // 성공적으로 수정 후 새 창 닫고, 부모 창 (마이페이지) 새로고침
-                    if (window.opener) {
-                        window.opener.location.reload();
-                    }
-                    window.close();
+                    window.location.href = result.redirect;
                 } else {
                     alert(result.message || '개인정보 수정 실패');
                 }
