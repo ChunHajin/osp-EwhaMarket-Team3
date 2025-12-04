@@ -756,7 +756,7 @@ def view_review():
     """
     # 구현: 정렬 옵션 적용 및 페이지네이션
     page = request.args.get("page", 0, type=int)
-    per_page = 8
+    per_page = 4
     sort_option = request.args.get("sort", "latest")
 
     data = get_db().get_reviews() or {}
@@ -790,14 +790,9 @@ def view_review():
     end_idx = per_page * (page + 1)
     datas = dict(data_list[start_idx:end_idx])
 
-    row1 = dict(list(datas.items())[:2])
-    row2 = dict(list(datas.items())[2:8])
-
     return render_template(
         "review.html",
         datas=datas.items(),
-        row0=row1.items(),
-        row1=row2.items(),
         page=page,
         page_count=page_count,
         total=item_counts,
