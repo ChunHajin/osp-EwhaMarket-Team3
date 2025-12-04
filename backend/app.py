@@ -156,14 +156,15 @@ def view_review():
 
     for _, review in data_list:
         writer_id = review.get("writer_id")
+        default_profile = "uploads/profile/default.png"
         if writer_id:
             user_info = DB.get_user_info(writer_id)
-            if user_info:
+            if user_info and user_info.get("profile_img"):
                 review["profile_img"] = user_info.get("profile_img","")
             else:
-                review["profile_img"]=""
+                review["profile_img"] = default_profile
         else:
-            review["profile_img"]=""
+            review["profile_img"] = default_profile
     #정렬
     if sort_option == "latest":
         data_list.sort(
